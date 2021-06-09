@@ -2,11 +2,11 @@
 
 This is my GBS kea data.
 
-## This is a substitle
-### This is a smaller subtitle
+## Subtitle
+### Smaller subtitle
 
-Here is some text
+Paragraph 
 
 ```
-here is some code
+Code
 ```
