@@ -158,7 +158,7 @@ First alignment for every sample using BWA. Here is one example command:
 bwa mem -t 8 $bwa_db $src/${sample}.fq.gz | samtools view -b | samtools sort --threads 4 > ${sample}.bam
 ```
 
-The complete list of commands is in realign.sh :
+The complete list of commands is in [realign.sh](/keaGBS/blob/main/realign.sh):
 
 Ran script in realign.sh
 
