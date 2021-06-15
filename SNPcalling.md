@@ -36,9 +36,9 @@ Shorter reads are removed by setting minimum number of bp to 40.
 #!/bin/sh
 module load cutadapt
 
-cutadapt -a AGATCGGAAGAGC -m 40 -o trimmed_lane_2.fastq SQ1609_CD82MANXX_s_6_fastq.txt.gz 
+cutadapt -a AGATCGGAAGAGC -m 40 -o trim_practice1.fastq SQ1609_CD82MANXX_s_6_fastq.txt.gz 
 
-fastqc trimmed_lane_2.fastq
+fastqc trim_practice1.fastq
 ```
 #### *Just specifically for practice*
 
@@ -53,7 +53,7 @@ mkdir practice
 ```
 #!/bin/sh
 mv lane* practice/
-mv trimmed* practice/
+mv trim* practice/
 ```
 
 ## Reference Genome
@@ -90,22 +90,32 @@ First I extract barcodes from the .key file (SQ1609.txt) of the sequencing platf
 ```
 #!/bin/sh
 ##Key provided in folder
-cat SQ1609.txt | grep -E "K38" | cut -f 3-4 > barcodes_lane2.txt
+cat SQ1609.txt | grep -E "K38" | cut -f 3-4 > barcodes_practice1.txt
 ```
 Then I create different folders to deal with samples sequenced across the two different lanes before concatenating them together.
 
+//
+
+*below code for when have both data plates - will need to change above for actual analysis*
 ```
 #!/bin/sh
-mkdir raw2 samples2 raw3 samples3 samples_concatenated
+mkdir raw1 samples1 raw2 samples2 samples_concatenated
+cd raw1
+ln -s ../source_files/trim_plate_1.fastq
+cd ..
+
 cd raw2
-ln -s ../source_files/trimmed_lane_2.fastqc
+ln -s ../source_files/trim_plate_2.fastq
 cd ..
 ```
+//
 I am now ready to run process_radtags to demultiplex.
 
 ```
 #!/bin/sh
-process_radtags -p raw2/ -o ./samples2/ -b source_files_kea/barcodes_lane2.txt --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+process_radtags -p raw1/ -o ./samples1/ -b source_files_kea/barcodes_lane1.txt --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+
+process_radtags -p raw2/ -o ./samples2/ -b source_files_kea/barcodes_lane1.txt --renz_1 pstI --renz_2 mspI -r -c -q --inline_null (inline??**check the --inline code)
 ```
 
 ^^for the above need to include correct process_radtags for both lanes/plates, THEN concatenate samples. 
@@ -114,15 +124,15 @@ process_radtags -p raw2/ -o ./samples2/ -b source_files_kea/barcodes_lane2.txt -
 #python
 import os
 #
-for sample in os.listdir ("samples3"):
+for sample in os.listdir ("samples2"):
   print sample
-  if sample.endswith("gz") and not sample in os.listdir("samples2"):
+  if sample.endswith("gz") and not sample in os.listdir("samples1"):
     raise Exception
 
-for sample in os.listdir ("samples3"):
+for sample in os.listdir ("samples2"):
   print sample
-  if sample.endswith("gz") and not sample in os.listdir("samples2"):
-    os.system("cat samples2/"+sample+" samples3/"+sample+" > samples_concatenated/"+sample)
+  if sample.endswith("gz") and not sample in os.listdir("samples1"):
+    os.system("cat samples1/"+sample+" samples2/"+sample+" > samples_concatenated/"+sample)
 ```
 
 Then we will have clean sample files and ready for alignment.
@@ -134,7 +144,7 @@ Then we will have clean sample files and ready for alignment.
 ```
 #!/bin/sh
 cd uoo03341/practice/
-process_radtags -p practice/ -o practice/ -b source_files_kea/barcodes_lane2.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+process_radtags -p practice/ -o practice/ -b source_files_kea/barcodes_practice1.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
 ```
 
 *Looks good, keeping nearly 97% of reads*
