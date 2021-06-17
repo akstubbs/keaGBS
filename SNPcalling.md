@@ -6,7 +6,8 @@ Contact akstubbs.nz@gmail.com for access
 
 ## Quality control
 
-The data is single end __ across two lanes. 
+The data is single end __ across two lanes. For this practice, only lane 1 was used. 
+The adapter content and the barcodes were subset to understand the structure before being used on whole raw data file:
 
 ```
 #!/bin/sh
@@ -26,34 +27,30 @@ module load FastQC
 
 fastqc *fq
 ```
-Looking at the html output, sequence quality is okay but quite some error in lane 2 first few bases and last few.
+Looking at the html output, sequence quality is okay but quite some error in first and last few bases.
 
 I will first remove the last bases in each lane as there is a lot of adapter contamination. 
 As we are using a reference genome for kea, we do not need to have a common read length. 
 Shorter reads are removed by setting minimum number of bp to 40. 
 
+The following uses the whole raw data file. Unzipped first using zcat.
+
 ```
 #!/bin/sh
+mkdir raw1P samples1P
+
 module load cutadapt
 
-cutadapt -a AGATCGGAAGAGC -m 40 -o trim_practice1.fastq SQ1609_CD82MANXX_s_6_fastq.txt.gz 
+cd source_files_kea
+zcat SQ1609_CD82MANXX_s_6_fastq.txt.gz > SQ1609_1.fastq
 
-fastqc trim_practice1.fastq
-```
-#### *Just specifically for practice*
+cutadapt -j 2 -a AGATCGGAAGAGC -m 40 -o trimmed_SQ1609_1.fastq SQ1609_1.fastq 
+##storage file error appears - re run cutadapt and scripts from demultiplexing process_radtags step onwards (so all sequences completed for all samples)
 
-*I then created a practice folder specifically for this code.*
+cd ../raw1P
+ln -s ../source_files_kea/trimmed_SQ1609_1.fastq
 
-```
-#!/bin/sh
-mkdir practice
-```
-*The created fastqc files for practicing code were moved into the practice folder:*
-
-```
-#!/bin/sh
-mv lane* practice/
-mv trim* practice/
+fastqc trimmed_SQ1609_1.fastq #don't need to check this
 ```
 
 ## Reference Genome
@@ -90,73 +87,30 @@ First I extract barcodes from the .key file (SQ1609.txt) of the sequencing platf
 ```
 #!/bin/sh
 ##Key provided in folder
-cat SQ1609.txt | grep -E "K38" | cut -f 3-4 > barcodes_practice1.txt
+cat SQ1609.txt | grep -E "K38" | cut -f 3-4 > barcodes_1.txt
 ```
 Then I create different folders to deal with samples sequenced across the two different lanes before concatenating them together.
 
-//
 
-*below code for when have both data plates - will need to change above for actual analysis*
-```
-#!/bin/sh
-mkdir raw1 samples1 raw2 samples2 samples_concatenated
-cd raw1
-ln -s ../source_files/trim_plate_1.fastq
-cd ..
-
-cd raw2
-ln -s ../source_files/trim_plate_2.fastq
-cd ..
-```
-//
 I am now ready to run process_radtags to demultiplex.
-
-```
-#!/bin/sh
-process_radtags -p raw1/ -o ./samples1/ -b source_files_kea/barcodes_lane1.txt --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
-
-process_radtags -p raw2/ -o ./samples2/ -b source_files_kea/barcodes_lane1.txt --renz_1 pstI --renz_2 mspI -r -c -q --inline_null (inline??**check the --inline code)
-```
-
-^^for the above need to include correct process_radtags for both lanes/plates, THEN concatenate samples. 
-
-```
-#python
-import os
-#
-for sample in os.listdir ("samples2"):
-  print sample
-  if sample.endswith("gz") and not sample in os.listdir("samples1"):
-    raise Exception
-
-for sample in os.listdir ("samples2"):
-  print sample
-  if sample.endswith("gz") and not sample in os.listdir("samples1"):
-    os.system("cat samples1/"+sample+" samples2/"+sample+" > samples_concatenated/"+sample)
-```
 
 Then we will have clean sample files and ready for alignment.
 
-#### *Demultiplexing Just specifically for practice* 
-
-*Instead of working inside created folders (i.e. raw2, samples2) this was done in the practice folder*
-
 ```
 #!/bin/sh
-cd uoo03341/practice/
-process_radtags -p practice/ -o practice/ -b source_files_kea/barcodes_practice1.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+process_radtags -p raw1P/ -o samples/ -b source_files_kea/barcodes_1.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
 ```
 
-*Looks good, keeping nearly 97% of reads*
+Looks good, keeping nearly 98% of reads
 
 ```
-Outputing details to log: 'practice/process_radtags.practice.log'
+Outputing details to log: 'samples1P/process_radtags.raw1P.log'
 
-297351 total sequences
-  9019 barcode not found drops (3.0%)
-   441 low quality read drops (0.1%)
-   736 RAD cutsite not found drops (0.2%)
-287155 retained reads (96.6%)
+172273235 total sequences
+  3030216 barcode not found drops (1.8%)
+   268364 low quality read drops (0.2%)
+   443076 RAD cutsite not found drops (0.3%)
+168531579 retained reads (97.8%)
 ```
 
 ### Alignment and variant calling
@@ -168,7 +122,7 @@ First alignment for every sample using BWA. Here is one example command:
 bwa mem -t 8 $bwa_db $src/${sample}.fq.gz | samtools view -b | samtools sort --threads 4 > ${sample}.bam
 ```
 
-The complete list of commands is in [realign.sh](/keaGBS/blob/main/realign.sh):
+The complete list of commands is in [realign.sh](realign.sh):
 
 Ran script in realign.sh
 
@@ -196,6 +150,7 @@ mkdir output_refmap_NCS
 ```
 
 Then I run refmap from Stacks quick run to identify low quality individuals:
+**run ref_map.pl as a job
 
 ```
 #!/bin/sh
@@ -206,7 +161,7 @@ ref_map.pl --samples ./practice/alignment --popmap popmap_2_NCS.txt -T 8  -o ./p
 Now check samples and output files for low quality individuals with low sample numbers. 
 Remove these, the blank (if it hasn't already been removed?) and any misidentified individuals?
 
-Then run ref_map again cleanly:
+Then run ref_map populations again cleanly: - for different population filters
 
 ```
 
