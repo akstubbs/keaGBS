@@ -93,8 +93,8 @@ K38631
 K38632
 K38633"
 
-src=./practice
-bwa_db=./source_files_kea/ref_genome/kea_ref_genome.fasta
+src=../samples1P
+bwa_db=../source_files_kea/ref_genome/kea_ref_genome.fasta
 for sample in $files
 do
 	 bwa mem -t 8 $bwa_db $src/${sample}.fq.gz | samtools view -b | samtools sort --threads 4 > ${sample}.bam
