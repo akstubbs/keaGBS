@@ -44,9 +44,20 @@ module load cutadapt
 cd source_files_kea
 zcat SQ1609_CD82MANXX_s_6_fastq.txt.gz > SQ1609_1.fastq
 
-cutadapt -j 2 -a AGATCGGAAGAGC -m 40 -o trimmed_SQ1609_1.fastq SQ1609_1.fastq 
-##storage file error appears - re run cutadapt and scripts from demultiplexing process_radtags step onwards (so all sequences completed for all samples)
+cutadapt -j 2 -a ACCGAGATCGGAAGAGC -m 40 -o trimmed_SQ1609_1.fastq SQ1609_1.fastq 
 
+=== Summary for Plate 1 only below ===
+
+Total reads processed:             261,124,595
+Reads with adapters:               144,422,194 (55.3%)
+Reads that were too short:          26,004,723 (10.0%)
+Reads written (passing filters):   235,119,872 (90.0%)
+
+Total basepairs processed: 26,135,975,036 bp
+Total written (filtered):  18,588,542,969 bp (71.1%)
+```
+Create link of trimmed fastq file into raw1P folder. Optional check fastqc report of trimmed file
+```
 cd ../raw1P
 ln -s ../source_files_kea/trimmed_SQ1609_1.fastq
 
@@ -106,11 +117,11 @@ Looks good, keeping nearly 98% of reads
 ```
 Outputing details to log: 'samples1P/process_radtags.raw1P.log'
 
-172273235 total sequences
-  3030216 barcode not found drops (1.8%)
-   268364 low quality read drops (0.2%)
-   443076 RAD cutsite not found drops (0.3%)
-168531579 retained reads (97.8%)
+235119872 total sequences
+  4456537 barcode not found drops (1.9%)
+   394714 low quality read drops (0.2%)
+   682381 RAD cutsite not found drops (0.3%)
+229586240 retained reads (97.6%)
 ```
 
 ### Alignment and variant calling
@@ -145,7 +156,6 @@ I created a new folder for the output reference map:
 
 ```
 #!/bin/sh
-cd practice/
 mkdir output_refmap_NCS
 ```
 
@@ -155,7 +165,7 @@ Then I run refmap from Stacks quick run to identify low quality individuals:
 ```
 #!/bin/sh
 module load Stacks
-ref_map.pl --samples ./practice/alignment --popmap popmap_2_NCS.txt -T 8  -o ./practice/output_refmap_NCS
+ref_map.pl --samples samplesP/ --popmap popmap_2_NCS.txt -T 8 -o output_refmap_NCS/
 ```
 
 Now check samples and output files for low quality individuals with low sample numbers. 
@@ -164,7 +174,12 @@ Remove these, the blank (if it hasn't already been removed?) and any misidentifi
 Then run ref_map populations again cleanly: - for different population filters
 
 ```
+populations -P output_refmap_NCS/ -M popmap_2_NCS.txt.txt --vcf -r 0.75
 
+Removed 340641 loci that did not pass sample/population constraints from 476653 loci.
+Kept 136012 loci, composed of 11565989 sites; 21467 of those sites were filtered, 46519 variant sites remained.
+    11414907 genomic sites, of which 149380 were covered by multiple loci (1.3%).
+Mean genotyped sites per locus: 85.03bp (stderr 0.04).
 ```
 *Link to output files here* 
 
@@ -172,3 +187,12 @@ Then run ref_map populations again cleanly: - for different population filters
 
 *For population-level analyses*
 
+
+## Structure stuff
+
+Created a whitelist.txt file to generate a list of 1000 random loci. 
+```
+cat output_refmap_NCS/populations.sumstats.tsv | grep -v "#" | cut -f 1 | sort | uniq | shuf | head -n 1000 > whitelist.txt
+```
+
+Tried to load structure but missing a mainparams file...??
