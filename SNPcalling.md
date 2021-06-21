@@ -45,7 +45,8 @@ cd source_files_kea
 zcat SQ1609_CD82MANXX_s_6_fastq.txt.gz > SQ1609_1.fastq
 
 cutadapt -j 2 -a ACCGAGATCGGAAGAGC -m 40 -o trimmed_SQ1609_1.fastq SQ1609_1.fastq 
-
+```
+```
 === Summary for Plate 1 only below ===
 
 Total reads processed:             261,124,595
@@ -142,7 +143,7 @@ Ran script in realign.sh
 bash realign.sh
 ```
 
-I created a population map file for the three haplotype regions of wild kea (North, Central, South)
+I created a population map file for the three haplotype regions of wild kea (North, Central, South).
 
 ```
 #!/bin/sh
@@ -171,10 +172,12 @@ ref_map.pl --samples samplesP/ --popmap popmap_2_NCS.txt -T 8 -o output_refmap_N
 Now check samples and output files for low quality individuals with low sample numbers. 
 Remove these, the blank (if it hasn't already been removed?) and any misidentified individuals?
 
+Two samples, K38552 and K38547, will need to be merged as they are the same bird.
+
 Then run ref_map populations again cleanly: - for different population filters
 
 ```
-populations -P output_refmap_NCS/ -M popmap_2_NCS.txt.txt --vcf -r 0.75
+populations -P output_refmap_NCS/ -M popmap_2_NCS.txt --vcf --genepop --structure --plink -r 0.75
 
 Removed 340641 loci that did not pass sample/population constraints from 476653 loci.
 Kept 136012 loci, composed of 11565989 sites; 21467 of those sites were filtered, 46519 variant sites remained.
@@ -188,7 +191,7 @@ Mean genotyped sites per locus: 85.03bp (stderr 0.04).
 *For population-level analyses*
 
 
-## Structure stuff
+## Structure stuff ??
 
 Created a whitelist.txt file to generate a list of 1000 random loci. 
 ```
