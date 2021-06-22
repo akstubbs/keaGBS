@@ -124,6 +124,10 @@ Outputing details to log: 'samples1P/process_radtags.raw1P.log'
    682381 RAD cutsite not found drops (0.3%)
 229586240 retained reads (97.6%)
 ```
+**Two samples, K38552 and K38547, will need to be merged as they are the same bird.
+
+zcat K38552.fq.gz K38547.fq.gz | gzip -c > K38552_47.fq.gz **confirm this with Ludo as it was not originally saved
+
 
 ### Alignment and variant calling
 
@@ -171,8 +175,6 @@ ref_map.pl --samples samplesP/ --popmap popmap_2_NCS.txt -T 8 -o output_refmap_N
 
 Now check samples and output files for low quality individuals with low sample numbers. 
 Remove these, the blank (if it hasn't already been removed?) and any misidentified individuals?
-
-Two samples, K38552 and K38547, will need to be merged as they are the same bird.
 
 Then run ref_map populations again cleanly: - for different population filters
 
