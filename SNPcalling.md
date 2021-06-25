@@ -17,6 +17,7 @@ ls
 less Kea_conversion_table.txt
 
 zcat SQ1609_CD82MANXX_s_6_fastq.txt.gz | head -n 1000000 > lane2_sample.fq
+zcat SQ1630_CD9F4ANXX_s_7_fastq.txt.gz | head -n 1000000 > lane3_sample.fq
 ```
 
 Then I check the quality of the sequeniging run using fastqc. 
@@ -131,10 +132,10 @@ process_radtags -p raw1/ -o samples1/ -b source_files_kea/barcodes_1.txt  --renz
 process_radtags -p raw2/ -o samples2/ -b source_files_kea/barcodes_2.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
 ```
 
-Looks good, keeping nearly 98% of reads **
+Looks good, keeping ~98% of reads **
 
 ```
-Outputing details to log: 'samples1P/process_radtags.raw1.log'
+Outputing details to log: 'samples1/process_radtags.raw1.log'
 
 235119872 total sequences
   4456537 barcode not found drops (1.9%)
@@ -142,10 +143,32 @@ Outputing details to log: 'samples1P/process_radtags.raw1.log'
    682381 RAD cutsite not found drops (0.3%)
 229586240 retained reads (97.6%)
 
+Outputing details to log: 'samples2/process_radtags.raw2.log'
+
+239906708 total sequences
+  3833078 barcode not found drops (1.6%)
+   275458 low quality read drops (0.1%)
+   627642 RAD cutsite not found drops (0.3%)
+235170530 retained reads (98.0%)
 
 ```
-**Two samples, K38552 and K38547, will need to be merged as they are the same bird. Confirm the code below with Ludo**
+Concatenate samples from the two lanes using python:
 
+```
+#python
+import os
+#
+for sample in os.listdir ("samples2"):
+  print(sample)
+  if sample.endswith("gz") and not sample in os.listdir("samples1"):
+    raise Exception
+
+for sample in os.listdir ("samples2"):
+  if sample.endswith("gz"):
+    os.system("cat samples1/"+sample+" samples2/"+sample+" > samples_concatenated/"+sample)
+```
+
+Two samples, K38552 and K38547, were merged as they are the same bird.
 ```
 zcat K38552.fq.gz K38547.fq.gz | gzip -c > K38552_47.fq.gz
 ```
