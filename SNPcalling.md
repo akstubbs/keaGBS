@@ -37,17 +37,17 @@ The following uses the whole raw data file. Unzipped first using zcat.
 
 ```
 #!/bin/sh
-mkdir raw1P samples1P
-
 module load cutadapt
 
 cd source_files_kea
 zcat SQ1609_CD82MANXX_s_6_fastq.txt.gz > SQ1609_1.fastq
+zcat SQ1630_CD9F4ANXX_s_7_fastq.txt.gz > SQ1630_2.fastq
 
 cutadapt -j 2 -a ACCGAGATCGGAAGAGC -m 40 -o trimmed_SQ1609_1.fastq SQ1609_1.fastq 
+cutadapt -j 2 -a ACCGAGATCGGAAGAGC -m 40 -o trimmed_SQ1630_2.fastq SQ1630_2.fastq 
 ```
 ```
-=== Summary for Plate 1 only below ===
+=== Summary SQ1609 ===
 
 Total reads processed:             261,124,595
 Reads with adapters:               144,422,194 (55.3%)
@@ -56,13 +56,16 @@ Reads written (passing filters):   235,119,872 (90.0%)
 
 Total basepairs processed: 26,135,975,036 bp
 Total written (filtered):  18,588,542,969 bp (71.1%)
-```
-Create link of trimmed fastq file into raw1P folder. Optional check fastqc report of trimmed file
-```
-cd ../raw1P
-ln -s ../source_files_kea/trimmed_SQ1609_1.fastq
 
-fastqc trimmed_SQ1609_1.fastq #don't need to check this
+=== Summary SQ1630 ===
+
+Total reads processed:             259,007,851
+Reads with adapters:               127,761,396 (49.3%)
+Reads that were too short:          19,101,143 (7.4%)
+Reads written (passing filters):   239,906,708 (92.6%)
+
+Total basepairs processed: 25,938,225,049 bp
+Total written (filtered):  19,534,525,392 bp (75.3%)
 ```
 
 ## Reference Genome
@@ -100,9 +103,20 @@ First I extract barcodes from the .key file (SQ1609.txt) of the sequencing platf
 #!/bin/sh
 ##Key provided in folder
 cat SQ1609.txt | grep -E "K38" | cut -f 3-4 > barcodes_1.txt
+cat SQ1630.txt | grep -E "K38" | cut -f 3-4 > barcodes_2.txt
 ```
 Then I create different folders to deal with samples sequenced across the two different lanes before concatenating them together.
 
+```
+#!/bin/sh
+mkdir raw1 samples1 raw2 samples2 samples_concatenated
+
+cd ../raw1
+ln -s ../source_files_kea/trimmed_SQ1609_1.fastq
+
+cd ../raw2
+ln -s ../source_files_kea/trimmed_SQ1630_2.fastq
+```
 
 I am now ready to run process_radtags to demultiplex.
 
@@ -110,19 +124,22 @@ Then we will have clean sample files and ready for alignment.
 
 ```
 #!/bin/sh
-process_radtags -p raw1P/ -o samples/ -b source_files_kea/barcodes_1.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+process_radtags -p raw1/ -o samples/ -b source_files_kea/barcodes_1.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+process_radtags -p raw2/ -o samples/ -b source_files_kea/barcodes_2.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
 ```
 
 Looks good, keeping nearly 98% of reads
 
 ```
-Outputing details to log: 'samples1P/process_radtags.raw1P.log'
+Outputing details to log: 'samples1P/process_radtags.raw1.log'
 
 235119872 total sequences
   4456537 barcode not found drops (1.9%)
    394714 low quality read drops (0.2%)
    682381 RAD cutsite not found drops (0.3%)
 229586240 retained reads (97.6%)
+
+
 ```
 **Two samples, K38552 and K38547, will need to be merged as they are the same bird. Confirm the code below with Ludo**
 
