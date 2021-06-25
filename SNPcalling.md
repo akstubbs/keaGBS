@@ -124,11 +124,14 @@ Then we will have clean sample files and ready for alignment.
 
 ```
 #!/bin/sh
-process_radtags -p raw1/ -o samples/ -b source_files_kea/barcodes_1.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
-process_radtags -p raw2/ -o samples/ -b source_files_kea/barcodes_2.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+module load Stacks
+
+process_radtags -p raw1/ -o samples1/ -b source_files_kea/barcodes_1.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+
+process_radtags -p raw2/ -o samples2/ -b source_files_kea/barcodes_2.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
 ```
 
-Looks good, keeping nearly 98% of reads
+Looks good, keeping nearly 98% of reads **
 
 ```
 Outputing details to log: 'samples1P/process_radtags.raw1.log'
@@ -187,7 +190,6 @@ Then I run refmap from Stacks quick run to identify low quality individuals:
 
 ```
 #!/bin/sh
-module load Stacks
 ref_map.pl --samples samplesP/ --popmap popmap_2_NCS.txt -T 8 -o output_refmap_NCS/
 ```
 
