@@ -195,7 +195,7 @@ I created a population map file for the three haplotype regions of wild kea (Nor
 
 ```
 #!/bin/sh
-nano popmap_2_NCS.txt
+nano popmap_NCS?.txt
 <sample file prefix><tab><population ID>
 
 <K38*><tab><north/central/south>
@@ -205,7 +205,7 @@ I created a new folder for the output reference map:
 
 ```
 #!/bin/sh
-mkdir output_refmap_NCS
+mkdir output_refmap_NCS?
 ```
 
 Then I run refmap from Stacks quick run to identify low quality individuals:
@@ -213,7 +213,7 @@ Then I run refmap from Stacks quick run to identify low quality individuals:
 
 ```
 #!/bin/sh
-ref_map.pl --samples samplesP/ --popmap popmap_2_NCS.txt -T 8 -o output_refmap_NCS/
+ref_map.pl --samples samples_concatenated/ --popmap popmap_NCS?.txt -T 8 -o output_refmap_NCS?/
 ```
 
 Now check samples and output files for low quality individuals with low sample numbers. 
