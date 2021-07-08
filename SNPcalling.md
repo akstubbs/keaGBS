@@ -219,23 +219,47 @@ ref_map.pl --samples samples_concatenated/ --popmap popmap_NCS?.txt -T 8 -o outp
 Now check samples and output files for low quality individuals with low sample numbers. 
 Remove these, the blank (if it hasn't already been removed?) and any misidentified individuals?
 
-Then run ref_map populations again cleanly: - for different population filters
-
-**what type of pop filters need to be run? can we just do a generic one?**
+### Re-run ref_map populations again cleanly:
 
 ```
-populations -P output_refmap_NCS/ -M popmap_2_NCS.txt --vcf --genepop --structure --plink -r 0.75
+module load Stacks
 
-Removed 340641 loci that did not pass sample/population constraints from 476653 loci.
-Kept 136012 loci, composed of 11565989 sites; 21467 of those sites were filtered, 46519 variant sites remained.
-    11414907 genomic sites, of which 149380 were covered by multiple loci (1.3%).
-Mean genotyped sites per locus: 85.03bp (stderr 0.04).
+mkdir output_pop_NCS?
+
+populations -P output_refmap_NCS?/ -O output_pop_NCS?/ -M popmap_NCS?.txt -p 1 --write-single-snp --plink --vcf --verbose
+
+Removed 
+
 ```
 *Link to output files here* 
 
-## Re-filtering populations individually
+## Remove individuals with high missing data
 
-*For population-level analyses*
+VCFtools to look at missing data per individual. Make a new directory for copying VCF file after running populations
+```
+mkdir filtering
+cp output_pop_NCS?/populations.snps.vcf filtering/
+```
+
+Run vcftools to output a file that contains missingness on an individual level.
+
+```
+module load VCFtools/0.1.15-GCC-9.2.0-Perl-5.30.1
+vcftools --vcf populations.snps.vcf --missing-indv
+```
+Downloaded ".imiss" file and opened in Excel, sorted individuals by the most missing data (F_MISS). Created a scatterplot to visualise data (F_MISS x N_GENOTYPES-FILTERED)
+
+Four individuals >0.70 F_MISS threshold:
+
+K38612  K38699  K38682  K38689
+
+Vcftools run again to output a new VCF file, which removes individuals with >0.70 missing data. New VCF file renamed appropriately.
+```
+vcftools --vcf populations.snps.vcf --remove-indv K38612 --remove-indv K38699 --remove-indv K38682 --remove-indv K38689 --recode
+mv out.recode.vcf removed_missing.vcf
+```
+
+## Filtering
 
 
 ## Structure stuff ??
