@@ -256,16 +256,52 @@ K38612  K38699  K38682  K38689
 **We can remove these using the following code. However - this was not done, so we can check the filtering for all individuals. Individuals can be removed later on, after checking other filtering.**
 
 *Vcftools run again to output a new VCF file, which removes individuals with >0.70 missing data. New VCF file renamed appropriately.*
-*```
+
+```
 vcftools --vcf populations.snps.vcf --remove-indv K38612 --remove-indv K38699 --remove-indv K38682 --remove-indv K38689 --recode
 mv out.recode.vcf removed_missing.vcf
-```*
-
-
-
+```
 
 ## Filtering
 
+VCFtools to output the mean depth per individual:
+
+```
+vcftools --vcf populations.snps.vcf --depth
+```
+Generated 'out.idepth' file. Individual with highest depth, and doubled it to obtain maximum depth parameter. ```34```
+
+Remove SNPs with depth <2 and >34, and 80% missing data
+
+```
+vcftools --vcf populations.snps.vcf --minDP 2 --maxDP 34 --max-missing 0.80 --recode
+After filtering, kept 27652 out of a possible 92797 Sites
+
+```
+Rename new vcf to suitable name:
+
+```
+mv out.recode.vcf filtered_dp2_30_md80.vcf
+```
+Tried for different levels of filtering - depth <2 or <3, and 70% or 80% missing data :
+
+```
+vcftools --vcf populations.snps.vcf --minDP 3 --maxDP 34 --max-missing 0.80 --recode
+After filtering, kept 22944 out of a possible 92797 Sites
+
+vcftools --vcf populations.snps.vcf --minDP 3 --maxDP 34 --max-missing 0.70 --recode
+After filtering, kept 27857 out of a possible 92797 Sites
+
+vcftools --vcf populations.snps.vcf --minDP 2 --maxDP 34 --max-missing 0.70 --recode
+After filtering, kept 32616 out of a possible 92797 Sites
+```
+Number of SNPs kept compared. 
+
+Stringent filtering (3-34, 0.8 = 22944), less stringent (3-34, 0.7 = 27857). Difference ~6000.
+
+Stringent filtering (2-34, 0.8 = 27652), less stringent (2-34, 0.7 = 32616). Difference ~5000.
+
+**Stringent filtering 3min 34max 0.8 missing **
 
 ## Structure stuff ??
 
