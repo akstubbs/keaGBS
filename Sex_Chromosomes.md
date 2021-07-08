@@ -1,68 +1,58 @@
 # Kea Sex Chromosomes
 
-cd ../source_files_kea/
-ls
-makeblastdb -in kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -dbtype nucl
-module load blast
-module spide blast
+Kea do not have annotated sex chromosomes in reference genome assembly. Therefore we want to blast the reference genome of Kea to the reference genome of Kakapo, which do have annotated sex chromosomes.
+
+Kea - align to kākāpō
+Z: https://www.ncbi.nlm.nih.gov/nuccore/CM013763.2
+W: https://www.ncbi.nlm.nih.gov/nuccore/CM013773.2
+
+```
 module load BLAST
-makeblastdb -in kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -dbtype nucl
+cd ../source_files_kea/
+
 mkdir kakapo
-ls
-mv kakapo_gen* kakapo/
-ls
-cd kakapo/
-ls
-ls ../ref_genome/
-blastx -query ../ref_genome/kea_ref_genome.fasta -db kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -outfmt 7 > blast_results.txt
-head kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna
-ls
-cp kakapo_genome_GCF_004027225-Copy1.1_bStrHab1_v1.p_genomic.fna kakapo_genome_GCF_004027225.fa
-ls
-head kakapo_genome_GCF_004027225.fa 
-blastx -query ../ref_genome/kea_ref_genome.fasta -db kakapo_genome_GCF_004027225.fa -outfmt 7 > blast_results.txt
-ls
-blastx -query ../ref_genome/kea_ref_genome.fasta -db kakapo_genome_GCF_004027225.fa -outfmt 7 > blast_results.txt
-blastn -query ../ref_genome/kea_ref_genome.fasta -db kakapo_genome_GCF_004027225.fa -outfmt 7 > blast_results.txt
+cd kakapo
+
 makeblastdb -in kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -dbtype nucl
+
 blastn -query ../ref_genome/kea_ref_genome.fasta -db kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -outfmt 7 > blast_results.txt
+```
 
-//
+Kakapo sex chromosome alignment:
+Z?: NC_044301.1
+W?: NC_044302.1
 
-cd 
+Create a list of kea genome scaffolds that are potentially sex chromosomes in the kea genome. 
+
+```
 cd uoo03341/source_files_kea/kakapo/
-ls
-less blast_results.txt 
-grep NC044302.1 blast_results.txt
-less blast_results.txt 
-grep NC044301.1 blast_results.txt
-less blast_results.txt 
-grep NC_044301.1 blast_results.txt
-grep NC_044301.1 blast_results.txt | cut -f 1-2
-grep NC_044301.1 blast_results.txt | cut -f 1-2 | sort | uniq
+less blast_results.txt
+
+grep NC_044301.1 blast_results.txt | cut -f 1-2 | sort | uniq > potential_sex_chr.scaffolds.txt
+
+grep NC_044302.1 blast_results.txt | cut -f 1-2 | sort | uniq > potential_sex_chr.scaffolds.txt
+```
+Create a .fai file (fasta index file) from the kea reference genome. We get the length of scaffolds from the second column of the kea_ref_genome.fa.fai
+
+```
 module load SAMtools
-samtools faidx ../ref_genome/kea_ref_genome.fasta
-ls
 cd ../ref_genome/
-ls
+samtools faidx kea_ref_genome.fasta
 less kea_ref_genome.fasta.fai 
-grep JJRH01000001.1 kea_ref_genome.fasta -A 10
-x="TACCAGCACAATTAGCAGGCAGGtttcaagggtattcaaaggccatccaAAACCTTTAGAACTCTCAAATGGTACTGTAA
-ATAGCATGGTGGGGAAGCGGGGGGTATATGGGAATATCTCCTTCATAGGTTGACCcccaaagggaaggaaaaagaaagat
-gtttaatTGCTAAAGAATTCCATTATATGTGTCCCAAAGTATAGAGGCAATGACCACTCTGAGAACACGTGCCAGCTCAG
-TTTCATaatcaatgagtctattgtatta"
-wc -c $x
-grep [a-zA-Z] -c TACCAGCACAATTAGCAGGCAGGtttcaagggtattcaaaggccatccaAAACCTTTAGAACTCTCAAATGGTACTGTAA
-ATAGCATGGTGGGGAAGCGGGGGGTATATGGGAATATCTCCTTCATAGGTTGACCcccaaagggaaggaaaaagaaagat
-gtttaatTGCTAAAGAATTCCATTATATGTGTCCCAAAGTATAGAGGCAATGACCACTCTGAGAACACGTGCCAGCTCAG
-TTTCATaatcaatgagtctatt
-grep [a-zA-Z] -c $x
-echo "TACCAGCACAATTAGCAGGCAGGtttcaagggtattcaaaggccatccaAAACCTTTAGAACTCTCAAATGGTACTGTAA
-ATAGCATGGTGGGGAAGCGGGGGGTATATGGGAATATCTCCTTCATAGGTTGACCcccaaagggaaggaaaaagaaagat
-gtttaatTGCTAAAGAATTCCATTATATGTGTCCCAAAGTATAGAGGCAATGACCACTCTGAGAACACGTGCCAGCTCAG
-TTTCATaatcaatgagtctattgtatta" > test
-wc -c test
-less kea_ref_genome.fasta.fai 
-grep NC_044301.1 blast_results.txt | cut -f 1-2 | sort | uniq > potential_sex_chr.scaffolds.txt
-cd ../kakapo/
-grep NC_044301.1 blast_results.txt | cut -f 1-2 | sort | uniq > potential_sex_chr.scaffolds.txt
+```
+
+Combine file one and two, to find the proportion of your genome that is attributed to sex-chromosomes by blast.
+
+
+... 
+potential_sex_chr.scaffolds.txt -> will find sex chromosomes in kea genome
+lengths of scaffolds from the second column of kea_ref_genome.fa.fai file
+
+could do this by extracting total scaffold lengths in second column of the kea_ref_genome.fa.fai file, and extracting total of potential sex chromosome scaffold lengths ?? 
+
+1. List of sex chr from potential_sex_chr.scaffolds.txt file
+2. For each of thoese sex chromosomes, find corresponding length in kea_ref_genome.fa.fai file
+
+Sum those lengths.
+
+vcftools --not-chr ??
