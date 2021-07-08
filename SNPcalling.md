@@ -1,4 +1,4 @@
-# PRACTICE SNPcalling.md
+# SNPcalling.md
 
 The raw data is available on the High Capacity Storage of Otago University. 
 
@@ -6,7 +6,7 @@ Contact akstubbs.nz@gmail.com for access
 
 ## Quality control
 
-The data is single end __ across two lanes. For this practice, only lane 1 was used. 
+The data is single end __ across two lanes. 
 The adapter content and the barcodes were subset to understand the structure before being used on whole raw data file:
 
 ```
@@ -191,14 +191,14 @@ Ran script in realign.sh
 bash realign.sh
 ```
 
-I created a population map file for the three haplotype regions of wild kea (North, Central, South).
+I created a population map file for the three haplotype regions of wild kea (North, Central, South) and the captive population (unknown haplotype region; ?).
 
 ```
 #!/bin/sh
 nano popmap_NCS?.txt
 <sample file prefix><tab><population ID>
 
-<K38*><tab><north/central/south>
+<K38*><tab><north/central/south/?>
 
 ```
 I created a new folder for the output reference map:
@@ -253,11 +253,16 @@ Four individuals >0.70 F_MISS threshold:
 
 K38612  K38699  K38682  K38689
 
-Vcftools run again to output a new VCF file, which removes individuals with >0.70 missing data. New VCF file renamed appropriately.
-```
+**We can remove these using the following code. However - this was not done, so we can check the filtering for all individuals. Individuals can be removed later on, after checking other filtering.**
+
+*Vcftools run again to output a new VCF file, which removes individuals with >0.70 missing data. New VCF file renamed appropriately.*
+*```
 vcftools --vcf populations.snps.vcf --remove-indv K38612 --remove-indv K38699 --remove-indv K38682 --remove-indv K38689 --recode
 mv out.recode.vcf removed_missing.vcf
-```
+```*
+
+
+
 
 ## Filtering
 
