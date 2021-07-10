@@ -222,6 +222,7 @@ Remove these, the blank (if it hasn't already been removed?) and any misidentifi
 ### Re-run ref_map populations again cleanly:
 
 ```
+#!/bin/sh
 module load Stacks
 
 mkdir output_pop_NCS?
@@ -237,6 +238,7 @@ Removed
 
 VCFtools to look at missing data per individual. Make a new directory for copying VCF file after running populations
 ```
+#!/bin/sh
 mkdir filtering
 cp output_pop_NCS?/populations.snps.vcf filtering/
 ```
@@ -244,6 +246,7 @@ cp output_pop_NCS?/populations.snps.vcf filtering/
 Run vcftools to output a file that contains missingness on an individual level.
 
 ```
+#!/bin/sh
 module load VCFtools/0.1.15-GCC-9.2.0-Perl-5.30.1
 vcftools --vcf populations.snps.vcf --missing-indv
 ```
@@ -258,6 +261,7 @@ K38612  K38699  K38682  K38689
 *Vcftools run again to output a new VCF file, which removes individuals with >0.70 missing data. New VCF file renamed appropriately.*
 
 ```
+#!/bin/sh
 vcftools --vcf populations.snps.vcf --remove-indv K38612 --remove-indv K38699 --remove-indv K38682 --remove-indv K38689 --recode
 mv out.recode.vcf removed_missing.vcf
 ```
@@ -267,6 +271,7 @@ mv out.recode.vcf removed_missing.vcf
 VCFtools to output the mean depth per individual:
 
 ```
+#!/bin/sh
 vcftools --vcf populations.snps.vcf --depth
 ```
 Generated 'out.idepth' file. Individual with highest depth, and doubled it to obtain maximum depth parameter. ```34```
@@ -274,6 +279,7 @@ Generated 'out.idepth' file. Individual with highest depth, and doubled it to ob
 Remove SNPs with depth <2 and >34, and 80% missing data
 
 ```
+#!/bin/sh
 vcftools --vcf populations.snps.vcf --minDP 2 --maxDP 34 --max-missing 0.80 --recode
 After filtering, kept 27652 out of a possible 92797 Sites
 
@@ -281,11 +287,13 @@ After filtering, kept 27652 out of a possible 92797 Sites
 Rename new vcf to suitable name:
 
 ```
+#!/bin/sh
 mv out.recode.vcf filtered_dp2_30_md80.vcf
 ```
 Tried for different levels of filtering - depth <2 or <3, and 70% or 80% missing data :
 
 ```
+#!/bin/sh
 vcftools --vcf populations.snps.vcf --minDP 3 --maxDP 34 --max-missing 0.80 --recode
 After filtering, kept 22944 out of a possible 92797 Sites
 
@@ -307,6 +315,7 @@ Stringent filtering (2-34, 0.8 = 27652), less stringent (2-34, 0.7 = 32616). Dif
 
 Created a whitelist.txt file to generate a list of 1000 random loci. 
 ```
+#!/bin/sh
 cat output_refmap_NCS/populations.sumstats.tsv | grep -v "#" | cut -f 1 | sort | uniq | shuf | head -n 1000 > whitelist.txt
 ```
 
