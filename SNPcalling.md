@@ -309,7 +309,21 @@ Stringent filtering (3-34, 0.8 = 22944), less stringent (3-34, 0.7 = 27857). Dif
 
 Stringent filtering (2-34, 0.8 = 27652), less stringent (2-34, 0.7 = 32616). Difference ~5000.
 
-**Stringent filtering 3min 34max 0.8 missing **
+**Stringent filtering 3min 34max 0.8 missing ** -> still keeps 23,000 SNPs
+
+## PCA
+
+### Plink
+
+Load Plink. Give Plink the vcf (MinDP 3, missingness 0.80) and covert it into PLINK binary files (.bim,.bed,.fam). 
+```
+#!/bin/sh
+module load PLINK/1.09b6.16
+
+plink --vcf filtered_dp3_34_md80.vcf --allow-extra-chr --double-id --make-bed --out mygbs_pca
+
+```
+
 
 ## Structure stuff ??
 
