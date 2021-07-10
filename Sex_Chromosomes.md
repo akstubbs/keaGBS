@@ -11,6 +11,7 @@ W: https://www.ncbi.nlm.nih.gov/nuccore/CM013773.2
 
 Ran blastn as a job.
 ```
+#!/bin/sh
 module load BLAST
 cd ../source_files_kea/
 
@@ -32,6 +33,7 @@ W?: NC_044302.1
 Create a list of kea genome scaffolds that are potentially sex chromosomes in the kea genome. 
 
 ```
+#!/bin/sh
 cd uoo03341/source_files_kea/kakapo/
 less blast_results.txt
 
@@ -42,6 +44,7 @@ grep NC_044302.1 blast_results.txt | cut -f 1-2 | sort | uniq > potential_sex_ch
 Create a .fai file (fasta index file) from the kea reference genome. We get the length of scaffolds from the second column of the kea_ref_genome.fa.fai
 
 ```
+#!/bin/sh
 module load SAMtools
 cd ../ref_genome/
 samtools faidx kea_ref_genome.fasta
