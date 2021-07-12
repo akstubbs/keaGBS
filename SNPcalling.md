@@ -397,6 +397,9 @@ a <- ggplot(pve, aes(PC, pve)) + geom_bar(stat = "identity")
 a + ylab("Percentage variance explained") + theme_classic()
 ```
 
+<img src="https://user-images.githubusercontent.com/85653223/125231985-d3b8be00-e32f-11eb-93ee-2f9e3d6fe06b.png" width=50% height=50%>
+
+
 **plot PC1 x PC2 with variance**
 
 I wanted to be able to identify the samples by their haplotype region (plus unknown captive) as mentioned above for the population map (ref_map and populations). 
