@@ -211,7 +211,7 @@ Then I run refmap from Stacks quick run to identify low quality individuals:
 
 ```
 #!/bin/sh
-ref_map.pl --samples samples_concatenated/ --popmap popmap_NCS?.txt -T 8 -o output_refmap_NCS?/
+ref_map.pl --samples bam/ --popmap popmap_NCS?.txt -T 8 -o output_refmap_NCS?/
 ```
 
 Now check samples and output files for low quality individuals with low sample numbers. 
