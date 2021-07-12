@@ -377,8 +377,8 @@ text(eigenvec_table[,5], eigenvec_table[,6], eigenvec_table[,2], cex=0.35, xlim=
 Read in data
 
 ```
-pca <- read_table2("./mygbs_pca.eigenvec", col_names = FALSE)`
-eigenval <- scan("./mygbs_pca.eigenval")`
+pca <- read_table2("./mygbs_pca.eigenvec", col_names = FALSE)
+eigenval <- scan("./mygbs_pca.eigenval")
 ```
 Cleaning data up: remove nuisance column (had 2 col of ind names FID/ID)
 ```
