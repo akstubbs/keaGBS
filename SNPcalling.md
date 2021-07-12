@@ -150,7 +150,6 @@ Outputing details to log: 'samples2/process_radtags.raw2.log'
    275458 low quality read drops (0.1%)
    627642 RAD cutsite not found drops (0.3%)
 235170530 retained reads (98.0%)
-
 ```
 Concatenate samples from the two lanes using python:
 
@@ -199,7 +198,6 @@ nano popmap_NCS?.txt
 <sample file prefix><tab><population ID>
 
 <K38*><tab><north/central/south/?>
-
 ```
 I created a new folder for the output reference map:
 
@@ -229,8 +227,7 @@ mkdir output_pop_NCS?
 
 populations -P output_refmap_NCS?/ -O output_pop_NCS?/ -M popmap_NCS?.txt -p 1 --write-single-snp --plink --vcf --verbose
 
-Removed 
-
+Removed ...
 ```
 *Link to output files here* 
 
@@ -282,7 +279,6 @@ Remove SNPs with depth <2 and >34, and 80% missing data
 #!/bin/sh
 vcftools --vcf populations.snps.vcf --minDP 2 --maxDP 34 --max-missing 0.80 --recode
 After filtering, kept 27652 out of a possible 92797 Sites
-
 ```
 Rename new vcf to suitable name:
 
