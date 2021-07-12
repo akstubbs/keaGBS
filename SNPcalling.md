@@ -419,18 +419,18 @@ b <- b + coord_equal() + theme_classic()
 b + xlab(paste0("PC1 (", signif(pve$pve[1], 3), "%)")) + ylab(paste0("PC2 (", signif(pve$pve[2], 3), "%)"))
 ```
 
-<img src="https://user-images.githubusercontent.com/85653223/125230662-5db35780-e32d-11eb-9c13-a6379009bf2f.png" width=80% height=80%>
+<img src="https://user-images.githubusercontent.com/85653223/125230662-5db35780-e32d-11eb-9c13-a6379009bf2f.png" width=70% height=70%>
 
 
 **plot PC2 x PC3**
 ```
-c <- ggplot(pca, aes(PC2, PC3)) + geom_point(size = 1)
+c <- ggplot(pca, aes(PC2, PC3, color = Haplotype)) + geom_point(size = 1)
 c <- c + coord_equal() + theme_classic()
 c + xlab(paste0("PC2 (", signif(pve$pve[2], 3), "%)")) + ylab(paste0("PC3 (", signif(pve$pve[3], 3), "%)"))
 ```
 **plot PC3 x PC4**
 ```
-d <- ggplot(pca, aes(PC3, PC4)) + geom_point(size = 1)
+d <- ggplot(pca, aes(PC3, PC4, color = Haplotype)) + geom_point(size = 1)
 d <- d + coord_equal() + theme_classic()
 d + xlab(paste0("PC3 (", signif(pve$pve[3], 3), "%)")) + ylab(paste0("PC4 (", signif(pve$pve[4], 3), "%)"))
 ```
