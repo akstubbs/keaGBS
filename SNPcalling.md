@@ -356,7 +356,7 @@ plot(eigenvec_table[,3], eigenvec_table[,4], xlab = "PC1", ylab = "PC2", col = "
 text(eigenvec_table[,3], eigenvec_table[,4], eigenvec_table[,2], cex=0.50, xlim=c(-0.25,0.4))
 ```
 
-[PCA Plot1.pdf](https://github.com/akstubbs/keaGBS/files/6798500/PCA.Plot1.pdf)
+<img src="https://user-images.githubusercontent.com/85653223/125231404-c818c780-e32e-11eb-82a0-6025e73fa5ff.png" width=75% height=75%>
 
 
 **PC2xPC3**
@@ -416,6 +416,7 @@ b <- b + coord_equal() + theme_classic()
 b + xlab(paste0("PC1 (", signif(pve$pve[1], 3), "%)")) + ylab(paste0("PC2 (", signif(pve$pve[2], 3), "%)"))
 ```
 
+<img src="https://user-images.githubusercontent.com/85653223/125230662-5db35780-e32d-11eb-9c13-a6379009bf2f.png" width=80% height=80%>
 
 
 **plot PC2 x PC3**
