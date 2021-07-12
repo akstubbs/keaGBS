@@ -324,6 +324,60 @@ plink --vcf filtered_dp3_34_md80.vcf --allow-extra-chr --double-id --make-bed --
 
 ```
 
+Downloaded two output files:
+- mygbs_pca.eigenvec
+- mygbs_pca.eigenval
+
+Plotting completed in R.
+
+### Plotting PCA - detect population structure
+
+Install appropriate R packages:
+
+```
+install.packages("tidyverse")
+install.packages("readr")
+
+library(tidyverse)
+library(readr)
+
+```
+
+#### Base R PCA with sample names
+
+**PC1xPC2**
+
+```
+eigenvec_table <- read.table('mygbs_pca.eigenvec')
+plot(eigenvec_table[,3], eigenvec_table[,4], xlab = "PC1", ylab = "PC2", col = "seagreen", cex=0.50)
+```
+
+PCA with sample names in text for PC1xPC2
+```
+plot(eigenvec_table[,3], eigenvec_table[,4], xlab = "PC1", ylab = "PC2", col = "seagreen", cex=0)
+text(eigenvec_table[,3], eigenvec_table[,4], eigenvec_table[,2], cex=0.50, xlim=c(-0.25,0.4))
+```
+
+[PCA Plot1.pdf](https://github.com/akstubbs/keaGBS/files/6798500/PCA.Plot1.pdf)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Structure stuff ??
 
