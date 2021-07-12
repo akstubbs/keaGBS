@@ -321,7 +321,6 @@ Load Plink. Give Plink the vcf (MinDP 3, missingness 0.80) and covert it into PL
 module load PLINK/1.09b6.16
 
 plink --vcf filtered_dp3_34_md80.vcf --allow-extra-chr --double-id --make-bed --out mygbs_pca
-
 ```
 
 Downloaded two output files:
@@ -340,7 +339,6 @@ install.packages("readr")
 
 library(tidyverse)
 library(readr)
-
 ```
 
 #### Base R PCA with sample names
@@ -361,20 +359,77 @@ text(eigenvec_table[,3], eigenvec_table[,4], eigenvec_table[,2], cex=0.50, xlim=
 [PCA Plot1.pdf](https://github.com/akstubbs/keaGBS/files/6798500/PCA.Plot1.pdf)
 
 
+**PC2xPC3**
+
+```
+plot(eigenvec_table[,4], eigenvec_table[,5], xlab = "PC2", ylab = "PC3", col = "seagreen", cex=0)
+text(eigenvec_table[,4], eigenvec_table[,5], eigenvec_table[,2], cex=0.50, xlim=c(-0.25,0.4))
+```
+PCA with sample names in text for PC2xPC3
+
+```
+plot(eigenvec_table[,5], eigenvec_table[,6], xlab = "PC3", ylab = "PC4", col = "seagreen", cex=0)
+text(eigenvec_table[,5], eigenvec_table[,6], eigenvec_table[,2], cex=0.35, xlim=c(-0.25,0.4))
+```
+
+### PCA with ggplot, & variances per PC
+
+Read in data
+
+```
+pca <- read_table2("./mygbs_pca.eigenvec", col_names = FALSE)`
+eigenval <- scan("./mygbs_pca.eigenval")`
+```
+Cleaning data up: remove nuisance column (had 2 col of ind names FID/ID)
+```
+pca <- pca[,-1]
+
+#Set names
+names(pca)[1] <- "ind"
+names(pca)[2:ncol(pca)] <- paste0("PC", 1:(ncol(pca)-1))
+
+#Convert to percentage variance explained
+pve <- data.frame(PC = 1:20, pve = eigenval/sum(eigenval)*100)
+```
+Plot of PC variances
+```
+a <- ggplot(pve, aes(PC, pve)) + geom_bar(stat = "identity")
+a + ylab("Percentage variance explained") + theme_classic()
+```
+
+**plot PC1 x PC2 with variance**
+
+I wanted to be able to identify the samples by their haplotype region (plus unknown captive) as mentioned above for the population map (ref_map and populations). 
+
+Therefore, I extracted the pop_map file as a .csv file, and converted the V2 column (haplotypes) into factor variables that can be used to change the colour of the plot by haplotype group.
+
+```
+data = read.csv(file="pop test.csv", sep=',', header=F)
+Haplotype <- as.factor(data$V2)
+```
+
+Final code for plot:
+
+```
+b <- ggplot(pca, aes(PC1, PC2, color = Haplotype)) + geom_point(size = 1)
+b <- b + coord_equal() + theme_classic()
+b + xlab(paste0("PC1 (", signif(pve$pve[1], 3), "%)")) + ylab(paste0("PC2 (", signif(pve$pve[2], 3), "%)"))
+```
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+**plot PC2 x PC3**
+```
+c <- ggplot(pca, aes(PC2, PC3)) + geom_point(size = 1)
+c <- c + coord_equal() + theme_classic()
+c + xlab(paste0("PC2 (", signif(pve$pve[2], 3), "%)")) + ylab(paste0("PC3 (", signif(pve$pve[3], 3), "%)"))
+```
+**plot PC3 x PC4**
+```
+d <- ggplot(pca, aes(PC3, PC4)) + geom_point(size = 1)
+d <- d + coord_equal() + theme_classic()
+d + xlab(paste0("PC3 (", signif(pve$pve[3], 3), "%)")) + ylab(paste0("PC4 (", signif(pve$pve[4], 3), "%)"))
+```
 
 
 
