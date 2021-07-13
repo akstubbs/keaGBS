@@ -261,14 +261,17 @@ Four individuals >0.70 F_MISS threshold:
 
 K38612  K38699  K38682  K38689
 
-**We can remove these using the following code. However - this was not done, so we can check the filtering for all individuals. Individuals can be removed later on, after checking other filtering.**
+  **We can remove these using the following code. However - this was not done, so we can check the filtering for all individuals. Individuals can be removed later on, after checking other filtering.**
 
-*Vcftools run again to output a new VCF file, which removes individuals with >0.70 missing data. New VCF file renamed appropriately.*
+  *Vcftools run again to output a new VCF file, which removes individuals with >0.70 missing data. New VCF file renamed appropriately. And file moved into appropriate new folder for future analysis to take place and file storage.*
 
 ```
 #!/bin/sh
 vcftools --vcf populations.snps.vcf --remove-indv K38612 --remove-indv K38699 --remove-indv K38682 --remove-indv K38689 --recode
-mv out.recode.vcf removed_missing.vcf
+mv out.recode.vcf removed_4ind_70-FMISS.vcf
+
+mkdir filtering_70-FMISS_rm4ind
+mv removed_4ind_70-FMISS.vcf filtering_70-FMISS_rm4ind/
 ```
 
 ## Filtering
@@ -285,27 +288,30 @@ Remove SNPs with depth <2 and >34, and 80% missing data
 
 ```
 #!/bin/sh
-vcftools --vcf populations.snps.vcf --minDP 2 --maxDP 34 --max-missing 0.80 --recode
+vcftools --vcf ../populations.snps.vcf --minDP 2 --maxDP 34 --max-missing 0.80 --recode
 After filtering, kept 27652 out of a possible 92797 Sites
 ```
 Rename new vcf to suitable name:
 
 ```
 #!/bin/sh
-mv out.recode.vcf filtered_dp2_30_md80.vcf
+mv out.recode.vcf filtered_dp2_34_md80.vcf
 ```
 Tried for different levels of filtering - depth <2 or <3, and 70% or 80% missing data :
 
 ```
 #!/bin/sh
-vcftools --vcf populations.snps.vcf --minDP 3 --maxDP 34 --max-missing 0.80 --recode
+vcftools --vcf ../populations.snps.vcf --minDP 3 --maxDP 34 --max-missing 0.80 --recode
 After filtering, kept 22944 out of a possible 92797 Sites
+mv out.recode.vcf filtered_dp3_34_md80.vcf
 
-vcftools --vcf populations.snps.vcf --minDP 3 --maxDP 34 --max-missing 0.70 --recode
+vcftools --vcf ../populations.snps.vcf --minDP 3 --maxDP 34 --max-missing 0.70 --recode
 After filtering, kept 27857 out of a possible 92797 Sites
+mv out.recode.vcf filtered_dp3_34_md70.vcf
 
-vcftools --vcf populations.snps.vcf --minDP 2 --maxDP 34 --max-missing 0.70 --recode
+vcftools --vcf ../populations.snps.vcf --minDP 2 --maxDP 34 --max-missing 0.70 --recode
 After filtering, kept 32616 out of a possible 92797 Sites
+mv out.recode.vcf filtered_dp2_34_md70.vcf
 ```
 Number of SNPs kept compared. 
 
@@ -324,12 +330,12 @@ Load Plink. Give Plink the vcf (MinDP 3, missingness 0.80) and covert it into PL
 #!/bin/sh
 module load PLINK/1.09b6.16
 
-plink --vcf filtered_dp3_34_md80.vcf --allow-extra-chr --double-id --make-bed --out mygbs_pca
+plink --vcf filtered_dp3_34_md80.vcf --allow-extra-chr --double-id --make-bed --out pca_filtered_dp3_34_md80
 ```
 
 Downloaded two output files:
-- mygbs_pca.eigenvec
-- mygbs_pca.eigenval
+- pca_filtered_dp3_34_md80.eigenvec
+- pca_filtered_dp3_34_md80.eigenval
 
 Plotting completed in R.
 
@@ -350,7 +356,7 @@ library(readr)
 **PC1xPC2**
 
 ```
-eigenvec_table <- read.table('mygbs_pca.eigenvec')
+eigenvec_table <- read.table('pca_filtered_dp3_34_md80.eigenvec')
 plot(eigenvec_table[,3], eigenvec_table[,4], xlab = "PC1", ylab = "PC2", col = "seagreen", cex=0.50)
 ```
 
@@ -381,8 +387,8 @@ text(eigenvec_table[,5], eigenvec_table[,6], eigenvec_table[,2], cex=0.35, xlim=
 Read in data
 
 ```
-pca <- read_table2("./mygbs_pca.eigenvec", col_names = FALSE)
-eigenval <- scan("./mygbs_pca.eigenval")
+pca <- read_table2("./pca_filtered_dp3_34_md80.eigenvec", col_names = FALSE)
+eigenval <- scan("./pca_filtered_dp3_34_md80.eigenval")
 ```
 Cleaning data up: remove nuisance column (had 2 col of ind names FID/ID)
 ```
