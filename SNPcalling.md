@@ -336,7 +336,10 @@ module load PLINK/1.09b6.16
 
 plink --vcf filtered_dp3_34_md80.vcf --allow-extra-chr --double-id --make-bed --out pca_filtered_dp3_34_md80
 ```
-
+Create pca output files:
+```
+plink --bfile filtered_dp3_34_md80 --allow-extra-chr --pca --out filtered_dp3_34_md80
+```
 Downloaded two output files:
 - pca_filtered_dp3_34_md80.eigenvec
 - pca_filtered_dp3_34_md80.eigenval
