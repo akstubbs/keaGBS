@@ -457,11 +457,19 @@ d + xlab(paste0("PC3 (", signif(pve$pve[3], 3), "%)")) + ylab(paste0("PC4 (", si
 
 Created file containing all captive kea sample names: kea_sample_IDs_captive.txt
 
-Re-run Plink with flag --exclude to exclude samples from captive kea file.
+Re-run Plink with flag --remove-fam to exclude samples from captive kea file.
 
 ```
-plink --vcf filtered_dp3_34_md80.vcf --exclude kea_sample_IDs_captive.txt --allow-extra-chr --double-id --make-bed --out pca_filtered_dp3_34_md80_NoCaptiveInd
+plink --vcf filtered_dp3_34_md80.vcf --remove-fam ../kea_sample_IDs_captive.txt --allow-extra-chr --double-id --make-bed --out pca_filtered_dp3_34_md80_NoCaptiveInd
 ```
+
+Some of the output from the plink log - showing that all the captive individuals (N=48) were successfully removed. 139 individuals remaining.
+``` 
+187 people (0 males, 0 females, 187 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to pca_filtered_dp3_34_md80_NoCaptiveInd.nosex .
+--remove-fam: 139 people remaining.
+```
+
 Create pca output files:
 ```
 #!/bin/sh
