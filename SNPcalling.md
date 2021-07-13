@@ -174,6 +174,13 @@ zcat K38552.fq.gz K38547.fq.gz | gzip -c > K38552_47.fq.gz
 
 ### Alignment and variant calling
 
+Make directory for bam files to be kept in:
+
+```
+#!/bin/sh
+mkdir bam_files_ALLsamples
+```
+
 First alignment for every sample using BWA. Here is one example command:
 
 ```
@@ -187,14 +194,15 @@ Ran script in realign.sh
 
 ```
 #!/bin/sh
-bash realign.sh
+cd bam_files_ALLsamples
+bash ../realign.sh
 ```
 
 I created a population map file for the three haplotype regions of wild kea (North, Central, South) and the captive population (unknown haplotype region).
 
 ```
 #!/bin/sh
-nano popmap_haplotype.txt
+cd nano popmap_haplotype.txt
 <sample file prefix><tab><population ID>
 
 <K38*><tab><north/central/south/?>
@@ -211,7 +219,7 @@ Then I run refmap from Stacks quick run to identify low quality individuals:
 
 ```
 #!/bin/sh
-ref_map.pl --samples bam/ --popmap popmap_haplotype.txt -T 8 -o output_refmap_haplotype/
+ref_map.pl --samples bam_files_ALLsamples/ --popmap popmap_haplotype.txt -T 8 -o output_refmap_haplotype/
 ```
 
 Now check samples and output files for low quality individuals with low sample numbers. 
