@@ -75,15 +75,15 @@ Created a folder for kea reference genome:
 #!/bin/sh
 cd 
 cd source_files_kea/
-mkdir -p ref_genome
+mkdir -p kea_ref_genome
 ```
-Copied kea reference genome into ref_genome folder and unzipped file
+Copied kea reference genome into kea_ref_genome folder and unzipped file
 
 ```
 #!/bin/sh
-curl -L -o ref_genome/kea_ref_genome.fasta.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/696/875/GCA_000696875.1_ASM69687v1/GCA_000696875.1_ASM69687v1_genomic.fna.gz
+curl -L -o kea_ref_genome/kea_ref_genome.fasta.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/696/875/GCA_000696875.1_ASM69687v1/GCA_000696875.1_ASM69687v1_genomic.fna.gz
 
-gunzip ref_genome/kea_ref_genome.fasta.gz
+gunzip kea_ref_genome/kea_ref_genome.fasta.gz
 ```
 Load BWA and index reference
 
@@ -190,11 +190,11 @@ Ran script in realign.sh
 bash realign.sh
 ```
 
-I created a population map file for the three haplotype regions of wild kea (North, Central, South) and the captive population (unknown haplotype region; ?).
+I created a population map file for the three haplotype regions of wild kea (North, Central, South) and the captive population (unknown haplotype region).
 
 ```
 #!/bin/sh
-nano popmap_NCS?.txt
+nano popmap_haplotype.txt
 <sample file prefix><tab><population ID>
 
 <K38*><tab><north/central/south/?>
@@ -203,7 +203,7 @@ I created a new folder for the output reference map:
 
 ```
 #!/bin/sh
-mkdir output_refmap_NCS?
+mkdir output_refmap_haplotype
 ```
 
 Then I run refmap from Stacks quick run to identify low quality individuals:
@@ -211,7 +211,7 @@ Then I run refmap from Stacks quick run to identify low quality individuals:
 
 ```
 #!/bin/sh
-ref_map.pl --samples bam/ --popmap popmap_NCS?.txt -T 8 -o output_refmap_NCS?/
+ref_map.pl --samples bam/ --popmap popmap_haplotype.txt -T 8 -o output_refmap_haplotype/
 ```
 
 Now check samples and output files for low quality individuals with low sample numbers. 
@@ -223,9 +223,9 @@ Remove these, the blank (if it hasn't already been removed?) and any misidentifi
 #!/bin/sh
 module load Stacks
 
-mkdir output_pop_NCS?
+mkdir output_pop_haplotype
 
-populations -P output_refmap_NCS?/ -O output_pop_NCS?/ -M popmap_NCS?.txt -p 1 --write-single-snp --plink --vcf --verbose
+populations -P output_refmap_haplotype/ -O output_pop_haplotype/ -M popmap_haplotype.txt -p 1 --write-single-snp --plink --vcf --verbose
 
 Removed ...
 ```
@@ -236,8 +236,8 @@ Removed ...
 VCFtools to look at missing data per individual. Make a new directory for copying VCF file after running populations
 ```
 #!/bin/sh
-mkdir filtering
-cp output_pop_NCS?/populations.snps.vcf filtering/
+mkdir filtering_haplotype
+cp output_pop_haplotype/populations.snps.vcf filtering_haplotype/
 ```
 
 Run vcftools to output a file that contains missingness on an individual level.
@@ -439,7 +439,7 @@ d + xlab(paste0("PC3 (", signif(pve$pve[3], 3), "%)")) + ylab(paste0("PC4 (", si
 Created a whitelist.txt file to generate a list of 1000 random loci. 
 ```
 #!/bin/sh
-cat output_refmap_NCS/populations.sumstats.tsv | grep -v "#" | cut -f 1 | sort | uniq | shuf | head -n 1000 > whitelist.txt
+cat output_refmap_haplotype/populations.sumstats.tsv | grep -v "#" | cut -f 1 | sort | uniq | shuf | head -n 1000 > whitelist.txt
 ```
 
 Tried to load structure but missing a mainparams file...??
