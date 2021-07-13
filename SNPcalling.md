@@ -338,7 +338,8 @@ plink --vcf filtered_dp3_34_md80.vcf --allow-extra-chr --double-id --make-bed --
 ```
 Create pca output files:
 ```
-plink --bfile filtered_dp3_34_md80 --allow-extra-chr --pca --out filtered_dp3_34_md80
+#!/bin/sh
+plink --bfile pca_filtered_dp3_34_md80 --allow-extra-chr --pca --out pca_filtered_dp3_34_md80
 ```
 Downloaded two output files:
 - pca_filtered_dp3_34_md80.eigenvec
@@ -452,7 +453,25 @@ d <- d + coord_equal() + theme_classic()
 d + xlab(paste0("PC3 (", signif(pve$pve[3], 3), "%)")) + ylab(paste0("PC4 (", signif(pve$pve[4], 3), "%)"))
 ```
 
+### PCA plots excluding captive kea samples
 
+Created file containing all captive kea sample names: kea_sample_IDs_captive.txt
+
+Re-run Plink with flag --exclude to exclude samples from captive kea file.
+
+```
+plink --vcf filtered_dp3_34_md80.vcf --exclude kea_sample_IDs_captive.txt --allow-extra-chr --double-id --make-bed --out pca_filtered_dp3_34_md80_NoCaptiveInd
+```
+Create pca output files:
+```
+#!/bin/sh
+plink --bfile pca_filtered_dp3_34_md80_NoCaptiveInd --allow-extra-chr --pca --out pca_filtered_dp3_34_md80_NoCaptiveInd
+```
+Downloaded two output files:
+- pca_filtered_dp3_34_md80_NoCaptiveInd.eigenvec
+- pca_filtered_dp3_34_md80_NoCaptiveInd.eigenval
+
+Plotting completed in R.
 
 
 ## Structure stuff ??
