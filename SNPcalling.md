@@ -2,11 +2,15 @@
 
 The raw data is available on the High Capacity Storage of Otago University. 
 
-Contact akstubbs.nz@gmail.com for access
+Contact akstubbs.nz@gmail.com for access.
 
 ## Quality control
 
 The data is single end __ across two lanes. 
+
+- Plate 1 / lane1 = SQ1609...6_fastq.txt.gz
+- Plate 2 / lane2 = SQ1630...7_fastq.txt.gz
+
 The adapter content and the barcodes were subset to understand the structure before being used on whole raw data file:
 
 ```
@@ -14,10 +18,10 @@ The adapter content and the barcodes were subset to understand the structure bef
 # in source_files_kea
 
 ls
-less Kea_conversion_table.txt
+less Kea_conversion_table_plate1.txt
 
-zcat SQ1609_CD82MANXX_s_6_fastq.txt.gz | head -n 1000000 > lane2_sample.fq
-zcat SQ1630_CD9F4ANXX_s_7_fastq.txt.gz | head -n 1000000 > lane3_sample.fq
+zcat SQ1609_CD82MANXX_s_6_fastq.txt.gz | head -n 1000000 > lane1_sample.fq
+zcat SQ1630_CD9F4ANXX_s_7_fastq.txt.gz | head -n 1000000 > lane2_sample.fq
 ```
 
 Then I check the quality of the sequeniging run using fastqc. 
@@ -98,13 +102,13 @@ bwa index kea_ref_genome.fasta
 
 ### Demultiplexing
 
-First I extract barcodes from the .key file (SQ1609.txt) of the sequencing platform.
+First I extract barcodes from the .key file (SQ1609.txt and SQ1630.txt) of the sequencing platform.
 
 ```
 #!/bin/sh
 ##Key provided in folder
-cat SQ1609.txt | grep -E "K38" | cut -f 3-4 > barcodes_1.txt
-cat SQ1630.txt | grep -E "K38" | cut -f 3-4 > barcodes_2.txt
+cat SQ1609.txt | grep -E "K38" | cut -f 3-4 > barcodes_plate_1.txt
+cat SQ1630.txt | grep -E "K38" | cut -f 3-4 > barcodes_plate_2.txt
 ```
 Then I create different folders to deal with samples sequenced across the two different lanes before concatenating them together.
 
@@ -127,9 +131,9 @@ Then we will have clean sample files and ready for alignment.
 #!/bin/sh
 module load Stacks
 
-process_radtags -p raw1/ -o samples1/ -b source_files_kea/barcodes_1.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+process_radtags -p raw1/ -o samples1/ -b source_files_kea/barcodes_plate_1.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
 
-process_radtags -p raw2/ -o samples2/ -b source_files_kea/barcodes_2.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
+process_radtags -p raw2/ -o samples2/ -b source_files_kea/barcodes_plate_2.txt  --renz_1 pstI --renz_2 mspI -r -c -q --inline_null
 ```
 
 Looks good, keeping ~98% of reads **
