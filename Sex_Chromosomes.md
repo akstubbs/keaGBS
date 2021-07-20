@@ -80,9 +80,9 @@ Create a list of kea genome scaffolds that are potentially sex chromosomes in th
 cd uoo03341/source_files_kea/kakapo/
 less blast_results.txt
 
-grep NC_044301.1 blast_results.txt | cut -f 1-2 | sort | uniq > potential_sex_chr.scaffolds.txt
+grep NC_044301.1 blast_results.txt | cut -f 1-2 | sort | uniq > potential_sex_chrW.scaffolds.txt
 
-grep NC_044302.1 blast_results.txt | cut -f 1-2 | sort | uniq > potential_sex_chr.scaffolds.txt
+grep NC_044302.1 blast_results.txt | cut -f 1-2 | sort | uniq > potential_sex_chrZ.scaffolds.txt
 ```
 Create a .fai file (fasta index file) from the kea reference genome. We get the length of scaffolds from the second column of the kea_ref_genome.fa.fai
 
@@ -94,17 +94,38 @@ samtools faidx kea_ref_genome.fasta
 less kea_ref_genome.fasta.fai 
 ```
 
-Combine file one and two, to find the proportion of your genome that is attributed to sex-chromosomes by blast.
+Combine file one (W) and two (Z) by concatenating. Then sort and remove duplicate parts of kea genome scaffolds.
+```
+cat potential_sex_chrW.scaffolds.txt potential_sex_chrZ.scaffolds.txt > potential_sex_chr_concatenated.scaffolds.txt
+sort -u -k1,1 potential_sex_chr_concatenated.scaffolds.txt > potential_sex_chrsort.scaffolds.txt
+```
+```-u``` for unique, and ```-k1,1``` for the key field 1 (the filed with the kea genome scaffold).
 
+
+Now need to find the proportion of kea genome that is attributed to sex-chromosomes by blast.
+
+Lengths of scaffolds are from the second column of the kea_ref_genome.fa.fai file.
+
+Used ```awk``` to get sum of the total scaffold lengths:
+
+```
+module load bioawk
+awk '{sum+=$2;} END {print "Total of 2nd Column:" sum}2' ../kea_ref_genome/kea_ref_genome.fasta.fai 
+```
+```
+Total of 2nd Column:1053559886
+```
 
 ... 
-potential_sex_chr.scaffolds.txt -> will find sex chromosomes in kea genome
-lengths of scaffolds from the second column of kea_ref_genome.fa.fai file
+~~potential_sex_chr.scaffolds.txt -> will find sex chromosomes in kea genome
+lengths of scaffolds from the second column of kea_ref_genome.fa.fai file~~
 
-could do this by extracting total scaffold lengths in second column of the kea_ref_genome.fa.fai file, and extracting total of potential sex chromosome scaffold lengths ?? 
+could do this by ~~extracting total scaffold lengths in second column of the kea_ref_genome.fa.fai file~~, and extracting total of potential sex chromosome scaffold lengths ??
 
 1. List of sex chr from potential_sex_chr.scaffolds.txt file
 2. For each of thoese sex chromosomes, find corresponding length in kea_ref_genome.fa.fai file
+3. use potential txt file to extract lines of scaffold in whole kea file.
+4. repeat awk to get sum of scaffold lengths that are potential sex chromosomes.
 
 Sum those lengths.
 
