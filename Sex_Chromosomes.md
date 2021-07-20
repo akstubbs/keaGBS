@@ -4,9 +4,9 @@ Kea do not have annotated sex chromosomes in reference genome assembly. Therefor
 
 Kea - align to kākāpō
 
-Z: https://www.ncbi.nlm.nih.gov/nuccore/CM013763.2
-
 W: https://www.ncbi.nlm.nih.gov/nuccore/CM013773.2
+
+Z: https://www.ncbi.nlm.nih.gov/nuccore/CM013763.2
 
 
 Ran blastn as a job.
@@ -15,19 +15,66 @@ Ran blastn as a job.
 module load BLAST
 cd ../source_files_kea/
 
-mkdir kakapo
-cd kakapo
+mkdir kakapo_sex_chr
+cd kakapo_sex_chr
 
 makeblastdb -in kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -dbtype nucl
 
-blastn -query ../ref_genome/kea_ref_genome.fasta -db kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -outfmt 7 -num_threads 8 > blast_results.txt
+blastn -query ../kea_ref_genome/kea_ref_genome.fasta -db kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -outfmt 7 -num_threads 8 > blast_results.txt
 ```
+---
+---
+**Map kakapo sex chromosomes to kea genome**
+
+I was having problems with the above running for a very long time. 
+
+Instead of mapping whole kea to whole kakapo - Map the kakapo Z and W chromosome to the whole kea genome. The kea becomes the database.
+
+```
+#!/bin/sh
+module load BLAST
+
+cd kakapo_sex_chr
+makeblastdb -in ../kea_ref_genome/kea_ref_genome.fasta -dbtype nucl
+```
+```
+#!/bin/sh
+mkdir kakapo_w_chr kakapo_z_chr
+```
+
+
+Copy in the kakapo sex chromosomes from NCBI.
+
+
+**W chromosome:**
+```
+#!/bin/sh
+curl -L -o kakapo_w_chr/kakapo_w_chr.fasta.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Strigops_habroptila/all_assembly_versions/GCF_004027225.2_bStrHab1.2.pri/GCF_004027225.2_bStrHab1.2.pri_assembly_structure/Primary_Assembly/assembled_chromosomes/FASTA/chrW.fna.gz
+
+gunzip kakapo_w_chr/kakapo_w_chr.fasta.gz
+```
+**Z chromosome:**
+```
+#!/bin/sh
+curl -L -o kakapo_z_chr/kakapo_z_chr.fasta.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Strigops_habroptila/all_assembly_versions/GCF_004027225.2_bStrHab1.2.pri/GCF_004027225.2_bStrHab1.2.pri_assembly_structure/Primary_Assembly/assembled_chromosomes/FASTA/chrZ.fna.gz
+
+gunzip kakapo_z_chr/kakapo_z_chr.fasta.gz
+```
+
+Ran blastn as a job:
+```
+#!/bin/sh
+blastn -query ../kakapo_sex_chr/kakapo_z_chr/kakapo_z_chr.fasta -db ../kea_ref_genome/kea_ref_genome.fasta -outfmt 6 -num_threads 10 > blast_results_kakapoZtokea.txt
+```
+
+
+
 
 Kakapo sex chromosome alignment:
 
-Z?: NC_044301.1
+W: NC_044301.1
 
-W?: NC_044302.1
+Z: NC_044302.1
 
 
 Create a list of kea genome scaffolds that are potentially sex chromosomes in the kea genome. 
