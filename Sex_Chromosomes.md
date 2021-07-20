@@ -20,53 +20,8 @@ cd kakapo_sex_chr
 
 makeblastdb -in kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -dbtype nucl
 
-blastn -query ../kea_ref_genome/kea_ref_genome.fasta -db kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -outfmt 7 -num_threads 8 > blast_results.txt
+blastn -query ../kea_ref_genome/kea_ref_genome.fasta -db kakapo_genome_GCF_004027225.1_bStrHab1_v1.p_genomic.fna -outfmt 7 -num_threads 8 -max_target_seqs 3 > blast_results.txt
 ```
----
----
-**Map kakapo sex chromosomes to kea genome**
-
-I was having problems with the above running for a very long time. 
-
-Instead of mapping whole kea to whole kakapo - Map the kakapo Z and W chromosome to the whole kea genome. The kea becomes the database.
-
-```
-#!/bin/sh
-module load BLAST
-
-cd kakapo_sex_chr
-makeblastdb -in ../kea_ref_genome/kea_ref_genome.fasta -dbtype nucl
-```
-```
-#!/bin/sh
-mkdir kakapo_w_chr kakapo_z_chr
-```
-
-
-Copy in the kakapo sex chromosomes from NCBI.
-
-
-**W chromosome:**
-```
-#!/bin/sh
-curl -L -o kakapo_w_chr/kakapo_w_chr.fasta.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Strigops_habroptila/all_assembly_versions/GCF_004027225.2_bStrHab1.2.pri/GCF_004027225.2_bStrHab1.2.pri_assembly_structure/Primary_Assembly/assembled_chromosomes/FASTA/chrW.fna.gz
-
-gunzip kakapo_w_chr/kakapo_w_chr.fasta.gz
-```
-**Z chromosome:**
-```
-#!/bin/sh
-curl -L -o kakapo_z_chr/kakapo_z_chr.fasta.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Strigops_habroptila/all_assembly_versions/GCF_004027225.2_bStrHab1.2.pri/GCF_004027225.2_bStrHab1.2.pri_assembly_structure/Primary_Assembly/assembled_chromosomes/FASTA/chrZ.fna.gz
-
-gunzip kakapo_z_chr/kakapo_z_chr.fasta.gz
-```
-
-Ran blastn as a job:
-```
-#!/bin/sh
-blastn -query ../kakapo_sex_chr/kakapo_z_chr/kakapo_z_chr.fasta -db ../kea_ref_genome/kea_ref_genome.fasta -outfmt 6 -num_threads 10 > blast_results_kakapoZtokea.txt
-```
-
 ## Kakapo sex chromosome alignment:
 
 W: NC_044301.1
@@ -115,6 +70,65 @@ awk '{sum+=$2;} END {print "Total of 2nd Column:" sum}2' ../kea_ref_genome/kea_r
 ```
 Total of 2nd Column:1053559886
 ```
+
+Sort the kea reference genome, and join it together with the potential kea sex chromosome scaffolds - to then determine the lengths of the potential sex chromosomes.
+```
+sort ../kea_ref_genome/kea_ref_genome.fasta.fai > kea_ref_genome_sorted.fasta.fai
+join potential_sex_chrsort.scaffolds.txt kea_ref_genome_sorted.fasta.fai > potential_sex_chr_withlength.txt
+
+less potential_sex_chr_withlength.txt 
+awk '{sum+=$3;} END {print "Total of 3nd Column:" sum}3' potential_sex_chr_withlength.txt 
+```
+``` 
+Total of 3nd Column:657976221 
+```
+
+Potential sex chromosome in genome =  657976221/1053559886 = 62.5%
+
+---
+---
+**Map kakapo sex chromosomes to kea genome**
+
+The proportion of the genome that was potentially sex chromosomes was really high (~65%, but should be ~10%).
+
+Therefore, instead of mapping whole kea to whole kakapo - Map the kakapo Z and W chromosome to the whole kea genome. The kea becomes the database.
+
+```
+#!/bin/sh
+module load BLAST
+
+cd kakapo_sex_chr
+makeblastdb -in ../kea_ref_genome/kea_ref_genome.fasta -dbtype nucl
+```
+```
+#!/bin/sh
+mkdir kakapo_w_chr kakapo_z_chr
+```
+Copy in the kakapo sex chromosomes from NCBI.
+
+**W chromosome:**
+```
+#!/bin/sh
+curl -L -o kakapo_w_chr/kakapo_w_chr.fasta.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Strigops_habroptila/all_assembly_versions/GCF_004027225.2_bStrHab1.2.pri/GCF_004027225.2_bStrHab1.2.pri_assembly_structure/Primary_Assembly/assembled_chromosomes/FASTA/chrW.fna.gz
+
+gunzip kakapo_w_chr/kakapo_w_chr.fasta.gz
+```
+**Z chromosome:**
+```
+#!/bin/sh
+curl -L -o kakapo_z_chr/kakapo_z_chr.fasta.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Strigops_habroptila/all_assembly_versions/GCF_004027225.2_bStrHab1.2.pri/GCF_004027225.2_bStrHab1.2.pri_assembly_structure/Primary_Assembly/assembled_chromosomes/FASTA/chrZ.fna.gz
+
+gunzip kakapo_z_chr/kakapo_z_chr.fasta.gz
+```
+
+Ran w and z blastn as jobs:
+```
+#!/bin/sh
+blastn -query kakapo_w_chr/kakapo_w_chr.fasta -db ../kea_ref_genome/kea_ref_genome.fasta -outfmt 6 -num_threads 10 -max_target_seqs 100000 > blast_results_kakapo_w_to_kea.txt
+
+blastn -query kakapo_z_chr/kakapo_z_chr.fasta -db ../kea_ref_genome/kea_ref_genome.fasta -outfmt 6 -num_threads 10 -max_target_seqs 100000 > blast_results_kakapo_z_to_kea.txt
+```
+
 
 ... 
 ~~potential_sex_chr.scaffolds.txt -> will find sex chromosomes in kea genome
