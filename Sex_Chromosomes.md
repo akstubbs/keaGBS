@@ -67,15 +67,11 @@ Ran blastn as a job:
 blastn -query ../kakapo_sex_chr/kakapo_z_chr/kakapo_z_chr.fasta -db ../kea_ref_genome/kea_ref_genome.fasta -outfmt 6 -num_threads 10 > blast_results_kakapoZtokea.txt
 ```
 
-
-
-
-Kakapo sex chromosome alignment:
+## Kakapo sex chromosome alignment:
 
 W: NC_044301.1
 
 Z: NC_044302.1
-
 
 Create a list of kea genome scaffolds that are potentially sex chromosomes in the kea genome. 
 
