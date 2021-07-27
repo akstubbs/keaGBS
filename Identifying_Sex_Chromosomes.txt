@@ -1,0 +1,207 @@
+###################################################################################### 
+#######																		   #######
+#######  Identifying Sex chromosomes in Australian magpie (Gymnorhina tibicen) #######  
+#######																		   #######
+###################################################################################### 
+
+### Pipeline to identify sex chromosome-linked scaffolds in the Australian magpie reference assembly 
+### (GenBank accession: GCA_013399875.1)
+### Stefanie Grosser, University of Otago, 22/07/2021
+
+
+### To identify scaffolds of sex chromosomal origin in the fragmented Australian magpie 
+### reference assembly, align the scaffolds to another reference genome with chromosome 
+### information. New Caledonian crow (Corvus moneduloides) has both sex chromosomes (Z & W)
+### assembled (GenBank accession: GCF_009650955.1).
+### Run LastZ for whole genome alignment. 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Files and directories ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Magpie genome
+Gymtib_genome_path=/nesi/project/uoo03290/source_files_currawong/Magpie_genome/
+Gymtib_genome_file=magpie_genome.fna
+Gymtib_index_file=magpie_genome.fna.fai
+
+### New Caledonian crow genome 
+Gymtib_genome_path=/nesi/project/uoo03290/source_files_currawong/Magpie_genome/ZWscaffold_identification/
+Gymtib_genome_file=GCF_009650955.1_bCorMon1.pri_genomic.fna
+
+### Script for running LastZ aligning all query scaffolds to a single target chromosome 
+/nesi/project/uoo03290/source_files_currawong/Magpie_genome/ZWscaffold_identification/alignGenomes_LastZ.sh
+
+### Analysis output path
+analyses_output_path=/nesi/project/uoo03290/source_files_currawong/Magpie_genome/ZWscaffold_identification/LastZ_analysis_out/
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prep Corvus moneduloides genome ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Separate the genome into chromosomes
+
+### Split the genome file from the New Caledonian crow into separate chromosomes.
+### The New Cal crow has 36 chromosomes but the assembly contains 105 scaffolds.
+### Check the scaffold lengths by running SAMtools faidx (first unzip fasta file)
+### (This has already been done: files .dict and .fai)
+
+### Split genome into separate chromosome files. 
+
+chr_out_path=${Gymtib_genome_path}chromosome_fastas/
+
+## Fasta header line example from genome file:
+## NC_045476.1 Corvus moneduloides isolate bCorMon1 chromosome 1, bCorMon1.pri, whole genome shotgun sequence
+
+## Extended loop with comments
+## For every line in the genome file
+
+while read line
+
+do
+	## If the line starts with ">" (header line)
+    if [[ ${line:0:1} == '>' ]]
+    
+    then
+    	## Extract the 1st 5th and 7th word from the header line: NC_045476.1_bCorMon1_Chr{NUMBER OF CHROMOSOME} and store in "name" variable
+        name=$(echo $line | sed 's/>//' | awk '{print $1 "_" $5 "_Chr" $7}')  
+        ## define output file name
+        outfile=${name}.fa
+        ## write the header line to new file with the defined chromosome name
+        echo $line > ${chr_out_path}${outfile}
+    
+    else
+    	## If not a header line write the line to the same file.
+        echo $line >> ${chr_out_path}${outfile}
+    
+    fi
+
+done < GCF_009650955.1_bCorMon1.pri_genomic.fna
+
+## Loop on one line without comments (not sure if this one-liner is correct)
+while read line; do if [[ ${line:0:1} == '>' ]]; then name=$(echo $line | sed 's/>//' | awk '{print $1 "_" $5 "_Chr" $7}'); outfile=${name}.fa; echo $line > ${chr_out_path}${outfile}; else echo $line >> ${chr_out_path}${outfile}; fi; done < GCF_009650955.1_bCorMon1.pri_genomic.fna
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Genome alignment ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+### Run the script for each chromosome of the New Caledonian crow genome (this will exclude small unplaced scaffolds included in the total genome assembly)
+
+## Define script input arguments (variables)
+query_chromosome_file=${Gymtib_genome_path}chromosome_fastas/Corvus_moneduloides_ChromosomeFastaList.txt	# Contains names of all chromosome fasta files
+target_path=$Gymtib_genome_path		# Path to magpie assembly
+target=$Gymtib_genome_file			# magpie assembly file name
+out_path=$analyses_output_path		# output path for analyses files
+query_species=Cormon				# Short form of alignment query species name (New Caledonian crow)
+target_species=Gymtip				# Short form of alignment target species name (magpie)
+
+## First generate the query_chromosome_file
+## In directory ${Gymtib_genome_path}chromosome_fastas/ run command:
+
+## Prints all files in the current working directory with their full path
+find $PWD -maxdepth 1 -type f > $query_chromosome_file
+
+## Run LastZ
+## Extended loop with comments
+## Loop runs the script for every fasta chromosome file listed in $query_chromosome_file
+
+while read line 
+
+do 
+	
+	## The alignment query contains the name of the chromosome fasta file
+	query=$line
+	## Output the command to run the script to a file to know which chromosome was run under which slurm ID
+	echo "sbatch alignGenomes_LastZ.sh ${query} ${target_path} ${target} ${out_path} ${query_species} ${target_species}" >> alignGenomes_LastZ_jobID_list.txt
+	## Run the actual command with input arguments
+	sbatch alignGenomes_LastZ.sh ${query} ${target_path} ${target} ${out_path} ${query_species} ${target_species}
+
+done < $query_chromosome_file
+
+
+## Loop on one line without comments
+while read line; do query=$line; echo "sbatch alignGenomes_LastZ.sh ${query} ${target_path} ${target} ${out_path} ${query_species} ${target_species}" >> alignGenomes_LastZ_jobID_list.txt; sbatch alignGenomes_LastZ.sh ${query} ${target_path} ${target} ${out_path} ${query_species} ${target_species}; done < $query_chromosome_file
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Scaffold extraction ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Extract the magpie scaffold names that aligned to New Caledonian crow Z and W chromosomes
+
+## Remove header line from files (tail -n +2), extract the 4th column containing the scaffold name (cut -f4), sort the scaffold names, and show every scaffold name only once (uniq). 
+tail -n +2 ${analyses_output_path}LastZalignment_Cormon_Gymtip_ChrZ.txt | cut -f4 | sort | uniq > ${analyses_output_path}Gymtip_ZWscaffold_names.txt
+tail -n +2 ${analyses_output_path}LastZalignment_Cormon_Gymtip_ChrW.txt | cut -f4 | sort | uniq >> ${analyses_output_path}Gymtip_ZWscaffold_names.txt
+
+## Remove scaffolds names that are duplicated because the scaffolds aligned to Z and W (save to temp file and then rename temp file)
+sort ${analyses_output_path}Gymtip_ZWscaffold_names.txt | uniq > ${analyses_output_path}Gymtip_ZWscaffold_names.txt_temp
+mv ${analyses_output_path}Gymtip_ZWscaffold_names.txt_temp ${analyses_output_path}Gymtip_ZWscaffold_names.txt
+
+
+### For all identified scaffolds get the scaffold size from the fasta index file (.fai) 
+## Extended loop with comments
+
+## For every identified scaffold name in Gymtip_ZWscaffold_names.txt
+while read line
+
+do 
+	## Get the line in the fasta index file matching the scaffold name and extract the first two columns of the line (scaffold name and size) and write to new file.
+	grep "$line" ${Gymtib_genome_path}${Gymtib_index_file} | cut -f1,2 >> ${analyses_output_path}Gymtip_ZWscaffold_names_scaffoldSizes.txt
+
+done < ${analyses_output_path}Gymtip_ZWscaffold_names.txt  
+
+
+## Loop on one line without comments
+while read line; do grep "$line" ${Gymtib_genome_path}${Gymtib_index_file} | cut -f1,2 >> ${analyses_output_path}Gymtip_ZWscaffold_names_scaffoldSizes.txt ; done < ${analyses_output_path}Gymtip_ZWscaffold_names.txt  
+
+
+### Get the total size of all the scaffolds (total sequence length of the magpie genome is 1,052,262,442)
+## Use awk to sum all values from column 2 (scaffolds size)
+
+awk '{sum += $2}END{print sum}' ${analyses_output_path}Gymtip_ZWscaffold_names_scaffoldSizes.txt
+# Combined size of identified scaffold is 86,323,752 (Z & W of New Caledonian crow together are approx.100Mb)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Verification of scaffolds ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Find out if scaffolds aligning to Z and W also align to other chromosomes (alignment was run without masking and repetitive sequence in scaffolds could align to several chromosomes).
+
+### Extract hits of Z W scaffolds against other chromosomes. 
+
+## Extended loop with comments
+## For all LastZalignment files
+
+for i in ${analyses_output_path}LastZalignment*.txt
+
+do 
+	## Extract chromosome name from file name and store in variable
+	chr=$(echo $i | cut -d "_" -f4 | sed 's/\.txt//')
+	## For each Z W scaffold in the scaffold list 
+	while read line
+	
+	do 
+		## Get the line in the LastZalignment file matching the scaffold name and write to new file.
+		grep "$line" $i >> ${analyses_output_path}ZWscaffold_match_${chr}.txt
+	
+	done < ${analyses_output_path}Gymtip_ZWscaffold_names.txt
+
+done
+
+
+## Loop on one line without comments
+for i in ${analyses_output_path}LastZalignment*.txt; do chr=$(echo $i | cut -d "_" -f4 | sed 's/\.txt//'); while read line; do grep "$line" $i >> ${analyses_output_path}ZWscaffold_match_${chr}.txt;	done < ${analyses_output_path}Gymtip_ZWscaffold_names.txt; done
+
+
+### Add the alignment length to each file to assess matches are real alignments of potential matches against repetitive elements etc (short, several matches of the same length at different chromosome positions)
+## Extended loop with comments
+
+## For all ZWscaffold_match files
+for i in ${analyses_output_path}ZWscaffold_match*.txt
+
+do 
+	## Extract the file name
+	name=$(basename "$i" ".txt")
+	## Print the entire line and add an additional column subtracting the start position of the alignment from the end positon (columns 5 and 6)+1 to get length of the alignment and write to new file
+	awk '{print $0 "\t" $6-$5+1}' $i > ${analyses_output_path}${name}_alignmentLengths.txt
+	
+done 
+
+
+
+### Finally, manually check the matches of scaffolds against the other chromosomes and compare with matches to the actual Z and W to assess true Z W identity.
+### Make a list of the final scaffold names. 
+### Exclude all SNPs found for these scaffolds from vcf file. 
