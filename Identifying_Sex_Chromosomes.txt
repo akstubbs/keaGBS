@@ -32,6 +32,7 @@ kakapo_genome_file=kakapo_ref_genome_GCA_004027225.2_bStrHab1.2.pri_genomic.fna
 
 ### Script for running LastZ aligning all query scaffolds to a single target chromosome 
 /nesi/project/uoo03341/source_files_kea/alignGenomes_LastZ.sh
+### Also saved here: alignGenomes_LastZ.sh
 
 ### Analysis output path
 analyses_output_path=/nesi/project/uoo03341/source_files_kea/kea_ref_genome/ZWscaffold_id/LastZ_analysis_out/
