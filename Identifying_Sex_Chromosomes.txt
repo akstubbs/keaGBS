@@ -34,7 +34,7 @@ kakapo_genome_file=kakapo_ref_genome_GCA_004027225.2_bStrHab1.2.pri_genomic.fna
 /nesi/project/uoo03341/source_files_kea/alignGenomes_LastZ.sh
 
 ### Analysis output path
-analyses_output_path=/nesi/project/uoo03341/source_files_kea/kea_ref_genome/ZWscaffold_identification/LastZ_analysis_out/
+analyses_output_path=/nesi/project/uoo03341/source_files_kea/kea_ref_genome/ZWscaffold_id/LastZ_analysis_out/
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prep Kakapo (Strigops habroptilus) genome ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -91,7 +91,7 @@ query_chromosome_file=${kakapo_genome_path}chromosome_fastas/kakapo_ChromosomeFa
 target_path=$kea_genome_path		# Path to kea assembly
 target=$kea_genome_file			# kea assembly file name
 out_path=$analyses_output_path		# output path for analyses files
-query_species=kakpo				# Short form of alignment query species name (kakapo)
+query_species=kakapo				# Short form of alignment query species name (kakapo)
 target_species=kea				# Short form of alignment target species name (kea)
 
 ## First generate the query_chromosome_file
