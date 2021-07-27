@@ -1,53 +1,56 @@
 ###################################################################################### 
 #######																		   #######
-#######  Identifying Sex chromosomes in Australian magpie (Gymnorhina tibicen) #######  
+#######  Identifying Sex chromosomes in Kea (Nestor notabilis) #######  
 #######																		   #######
 ###################################################################################### 
 
-### Pipeline to identify sex chromosome-linked scaffolds in the Australian magpie reference assembly 
-### (GenBank accession: GCA_013399875.1)
-### Stefanie Grosser, University of Otago, 22/07/2021
+### Pipeline to identify sex chromosome-linked scaffolds in the Kea reference assembly 
+### (GenBank accession: GCA_)
+### Aimee Stubbs, University of Otago, 27/07/2021
+
+### Adapted from Identifying Sex chromosomes in Australian magpie (Cracticus tibicen) 
+### by Stefanie Grosser, University of Otago, 22/07/2021
 
 
-### To identify scaffolds of sex chromosomal origin in the fragmented Australian magpie 
+### To identify scaffolds of sex chromosomal origin in the fragmented Kea 
 ### reference assembly, align the scaffolds to another reference genome with chromosome 
-### information. New Caledonian crow (Corvus moneduloides) has both sex chromosomes (Z & W)
-### assembled (GenBank accession: GCF_009650955.1).
+### information. Kakapo (Strigops habroptilus) has both sex chromosomes (Z & W)
+### assembled (GenBank accession: GCF_004027225.2).
 ### Run LastZ for whole genome alignment. 
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Files and directories ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Magpie genome
-Gymtib_genome_path=/nesi/project/uoo03290/source_files_currawong/Magpie_genome/
-Gymtib_genome_file=magpie_genome.fna
-Gymtib_index_file=magpie_genome.fna.fai
+### Kea genome
+kea_genome_path=/nesi/project/uoo03341/source_files_kea/kea_ref_genome/
+kea_genome_file=kea_ref_genome.fasta
+kea_index_file=kea_ref_genome.fasta.fai
 
-### New Caledonian crow genome 
-Gymtib_genome_path=/nesi/project/uoo03290/source_files_currawong/Magpie_genome/ZWscaffold_identification/
-Gymtib_genome_file=GCF_009650955.1_bCorMon1.pri_genomic.fna
+### Kakapo genome 
+kakapo_genome_path=/nesi/project/uoo03341/source_files_kea/kakapo_sex_chr/
+kakapo_genome_file=kakapo_ref_genome_GCA_004027225.2_bStrHab1.2.pri_genomic.fna
 
 ### Script for running LastZ aligning all query scaffolds to a single target chromosome 
-/nesi/project/uoo03290/source_files_currawong/Magpie_genome/ZWscaffold_identification/alignGenomes_LastZ.sh
+/nesi/project/uoo03341/source_files_kea/alignGenomes_LastZ.sh
 
 ### Analysis output path
-analyses_output_path=/nesi/project/uoo03290/source_files_currawong/Magpie_genome/ZWscaffold_identification/LastZ_analysis_out/
+analyses_output_path=/nesi/project/uoo03341/source_files_kea/kea_ref_genome/ZWscaffold_identification/LastZ_analysis_out/
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prep Corvus moneduloides genome ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prep Kakapo (Strigops habroptilus) genome ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Separate the genome into chromosomes
 
-### Split the genome file from the New Caledonian crow into separate chromosomes.
-### The New Cal crow has 36 chromosomes but the assembly contains 105 scaffolds.
+### Split the genome file from the kakapo into separate chromosomes.
+### The kakapo has 25 chromosomes but the assembly contains 89 scaffolds.
 ### Check the scaffold lengths by running SAMtools faidx (first unzip fasta file)
 ### (This has already been done: files .dict and .fai)
 
 ### Split genome into separate chromosome files. 
 
-chr_out_path=${Gymtib_genome_path}chromosome_fastas/
+chr_out_path=${kakapo_genome_path}chromosome_fastas/
 
 ## Fasta header line example from genome file:
-## NC_045476.1 Corvus moneduloides isolate bCorMon1 chromosome 1, bCorMon1.pri, whole genome shotgun sequence
+## NC_044277.2 Strigops habroptilus isolate Jane chromosome 1, bStrHab1.2.pri, whole genome shotgun sequence
 
 ## Extended loop with comments
 ## For every line in the genome file
@@ -59,7 +62,7 @@ do
     if [[ ${line:0:1} == '>' ]]
     
     then
-    	## Extract the 1st 5th and 7th word from the header line: NC_045476.1_bCorMon1_Chr{NUMBER OF CHROMOSOME} and store in "name" variable
+    	## Extract the 1st 5th and 7th word from the header line: NC_044277.2_bStrHab1_Chr{NUMBER OF CHROMOSOME} and store in "name" variable
         name=$(echo $line | sed 's/>//' | awk '{print $1 "_" $5 "_Chr" $7}')  
         ## define output file name
         outfile=${name}.fa
@@ -72,27 +75,27 @@ do
     
     fi
 
-done < GCF_009650955.1_bCorMon1.pri_genomic.fna
+done < kakapo_genome_GCA_004027225.2_bStrHab1.2.pri_genomic.fna
 
 ## Loop on one line without comments (not sure if this one-liner is correct)
-while read line; do if [[ ${line:0:1} == '>' ]]; then name=$(echo $line | sed 's/>//' | awk '{print $1 "_" $5 "_Chr" $7}'); outfile=${name}.fa; echo $line > ${chr_out_path}${outfile}; else echo $line >> ${chr_out_path}${outfile}; fi; done < GCF_009650955.1_bCorMon1.pri_genomic.fna
+while read line; do if [[ ${line:0:1} == '>' ]]; then name=$(echo $line | sed 's/>//' | awk '{print $1 "_" $5 "_Chr" $7}'); outfile=${name}.fa; echo $line > ${chr_out_path}${outfile}; else echo $line >> ${chr_out_path}${outfile}; fi; done < kakapo_genome_GCA_004027225.2_bStrHab1.2.pri_genomic.fna
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Genome alignment ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-### Run the script for each chromosome of the New Caledonian crow genome (this will exclude small unplaced scaffolds included in the total genome assembly)
+### Run the script for each chromosome of the kakapo genome (this will exclude small unplaced scaffolds included in the total genome assembly)
 
 ## Define script input arguments (variables)
-query_chromosome_file=${Gymtib_genome_path}chromosome_fastas/Corvus_moneduloides_ChromosomeFastaList.txt	# Contains names of all chromosome fasta files
-target_path=$Gymtib_genome_path		# Path to magpie assembly
-target=$Gymtib_genome_file			# magpie assembly file name
+query_chromosome_file=${kakapo_genome_path}chromosome_fastas/kakapo_ChromosomeFastaList.txt	# Contains names of all chromosome fasta files
+target_path=$kea_genome_path		# Path to kea assembly
+target=$kea_genome_file			# kea assembly file name
 out_path=$analyses_output_path		# output path for analyses files
-query_species=Cormon				# Short form of alignment query species name (New Caledonian crow)
-target_species=Gymtip				# Short form of alignment target species name (magpie)
+query_species=kakpo				# Short form of alignment query species name (kakapo)
+target_species=kea				# Short form of alignment target species name (kea)
 
 ## First generate the query_chromosome_file
-## In directory ${Gymtib_genome_path}chromosome_fastas/ run command:
+## In directory ${kakapo_genome_path}chromosome_fastas/ run command:
 
 ## Prints all files in the current working directory with their full path
 find $PWD -maxdepth 1 -type f > $query_chromosome_file
@@ -121,39 +124,39 @@ while read line; do query=$line; echo "sbatch alignGenomes_LastZ.sh ${query} ${t
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Scaffold extraction ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Extract the magpie scaffold names that aligned to New Caledonian crow Z and W chromosomes
+### Extract the kea scaffold names that aligned to kakapo Z and W chromosomes
 
 ## Remove header line from files (tail -n +2), extract the 4th column containing the scaffold name (cut -f4), sort the scaffold names, and show every scaffold name only once (uniq). 
-tail -n +2 ${analyses_output_path}LastZalignment_Cormon_Gymtip_ChrZ.txt | cut -f4 | sort | uniq > ${analyses_output_path}Gymtip_ZWscaffold_names.txt
-tail -n +2 ${analyses_output_path}LastZalignment_Cormon_Gymtip_ChrW.txt | cut -f4 | sort | uniq >> ${analyses_output_path}Gymtip_ZWscaffold_names.txt
+tail -n +2 ${analyses_output_path}LastZalignment_kakapo_kea_ChrZ.txt | cut -f4 | sort | uniq > ${analyses_output_path}kea_ZWscaffold_names.txt
+tail -n +2 ${analyses_output_path}LastZalignment_kakapo_kea_ChrW.txt | cut -f4 | sort | uniq >> ${analyses_output_path}kea_ZWscaffold_names.txt
 
 ## Remove scaffolds names that are duplicated because the scaffolds aligned to Z and W (save to temp file and then rename temp file)
-sort ${analyses_output_path}Gymtip_ZWscaffold_names.txt | uniq > ${analyses_output_path}Gymtip_ZWscaffold_names.txt_temp
-mv ${analyses_output_path}Gymtip_ZWscaffold_names.txt_temp ${analyses_output_path}Gymtip_ZWscaffold_names.txt
+sort ${analyses_output_path}kea_ZWscaffold_names.txt | uniq > ${analyses_output_path}kea_ZWscaffold_names.txt_temp
+mv ${analyses_output_path}kea_ZWscaffold_names.txt_temp ${analyses_output_path}kea_ZWscaffold_names.txt
 
 
 ### For all identified scaffolds get the scaffold size from the fasta index file (.fai) 
 ## Extended loop with comments
 
-## For every identified scaffold name in Gymtip_ZWscaffold_names.txt
+## For every identified scaffold name in kea_ZWscaffold_names.txt
 while read line
 
 do 
 	## Get the line in the fasta index file matching the scaffold name and extract the first two columns of the line (scaffold name and size) and write to new file.
-	grep "$line" ${Gymtib_genome_path}${Gymtib_index_file} | cut -f1,2 >> ${analyses_output_path}Gymtip_ZWscaffold_names_scaffoldSizes.txt
+	grep "$line" ${kea_genome_path}${kea_index_file} | cut -f1,2 >> ${analyses_output_path}kea_ZWscaffold_names_scaffoldSizes.txt
 
-done < ${analyses_output_path}Gymtip_ZWscaffold_names.txt  
+done < ${analyses_output_path}kea_ZWscaffold_names.txt  
 
 
 ## Loop on one line without comments
-while read line; do grep "$line" ${Gymtib_genome_path}${Gymtib_index_file} | cut -f1,2 >> ${analyses_output_path}Gymtip_ZWscaffold_names_scaffoldSizes.txt ; done < ${analyses_output_path}Gymtip_ZWscaffold_names.txt  
+while read line; do grep "$line" ${kea_genome_path}${kea_index_file} | cut -f1,2 >> ${analyses_output_path}kea_ZWscaffold_names_scaffoldSizes.txt ; done < ${analyses_output_path}kea_ZWscaffold_names.txt  
 
 
-### Get the total size of all the scaffolds (total sequence length of the magpie genome is 1,052,262,442)
+### Get the total size of all the scaffolds (total sequence length of the kea genome is _,_,_,_)
 ## Use awk to sum all values from column 2 (scaffolds size)
 
-awk '{sum += $2}END{print sum}' ${analyses_output_path}Gymtip_ZWscaffold_names_scaffoldSizes.txt
-# Combined size of identified scaffold is 86,323,752 (Z & W of New Caledonian crow together are approx.100Mb)
+awk '{sum += $2}END{print sum}' ${analyses_output_path}kea_ZWscaffold_names_scaffoldSizes.txt
+# Combined size of identified scaffold is _,_,_ (Z & W of kakapo together are approx._Mb)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Verification of scaffolds ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
