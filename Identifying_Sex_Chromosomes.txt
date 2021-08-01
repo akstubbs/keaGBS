@@ -128,8 +128,8 @@ while read line; do query=$line; echo "sbatch alignGenomes_LastZ.sh ${query} ${t
 ### Extract the kea scaffold names that aligned to kakapo Z and W chromosomes
 
 ## Remove header line from files (tail -n +2), extract the 4th column containing the scaffold name (cut -f4), sort the scaffold names, and show every scaffold name only once (uniq). 
-tail -n +2 ${analyses_output_path}LastZalignment_kakapo_kea_ChrZ.txt | cut -f4 | sort | uniq > ${analyses_output_path}kea_ZWscaffold_names.txt
-tail -n +2 ${analyses_output_path}LastZalignment_kakapo_kea_ChrW.txt | cut -f4 | sort | uniq >> ${analyses_output_path}kea_ZWscaffold_names.txt
+tail -n +2 ${analyses_output_path}LastZalignment_kakapo_kea_ChrZ,.txt | cut -f4 | sort | uniq > ${analyses_output_path}kea_ZWscaffold_names.txt
+tail -n +2 ${analyses_output_path}LastZalignment_kakapo_kea_ChrW,.txt | cut -f4 | sort | uniq >> ${analyses_output_path}kea_ZWscaffold_names.txt
 
 ## Remove scaffolds names that are duplicated because the scaffolds aligned to Z and W (save to temp file and then rename temp file)
 sort ${analyses_output_path}kea_ZWscaffold_names.txt | uniq > ${analyses_output_path}kea_ZWscaffold_names.txt_temp
@@ -153,11 +153,11 @@ done < ${analyses_output_path}kea_ZWscaffold_names.txt
 while read line; do grep "$line" ${kea_genome_path}${kea_index_file} | cut -f1,2 >> ${analyses_output_path}kea_ZWscaffold_names_scaffoldSizes.txt ; done < ${analyses_output_path}kea_ZWscaffold_names.txt  
 
 
-### Get the total size of all the scaffolds (total sequence length of the kea genome is _,_,_,_)
+### Get the total size of all the scaffolds (total sequence length of the kea genome is 1,053,559,886)
 ## Use awk to sum all values from column 2 (scaffolds size)
 
 awk '{sum += $2}END{print sum}' ${analyses_output_path}kea_ZWscaffold_names_scaffoldSizes.txt
-# Combined size of identified scaffold is _,_,_ (Z & W of kakapo together are approx._Mb)
+# Combined size of identified scaffold is 94,234,721 (Z & W of kakapo together are approx.137Mb)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Verification of scaffolds ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
