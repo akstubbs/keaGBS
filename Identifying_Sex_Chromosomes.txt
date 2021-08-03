@@ -181,13 +181,13 @@ do
 		## Get the line in the LastZalignment file matching the scaffold name and write to new file.
 		grep "$line" $i >> ${analyses_output_path}ZWscaffold_match_${chr}.txt
 	
-	done < ${analyses_output_path}Gymtip_ZWscaffold_names.txt
+	done < ${analyses_output_path}kea_ZWscaffold_names.txt
 
 done
 
 
 ## Loop on one line without comments
-for i in ${analyses_output_path}LastZalignment*.txt; do chr=$(echo $i | cut -d "_" -f4 | sed 's/\.txt//'); while read line; do grep "$line" $i >> ${analyses_output_path}ZWscaffold_match_${chr}.txt;	done < ${analyses_output_path}Gymtip_ZWscaffold_names.txt; done
+for i in ${analyses_output_path}LastZalignment*.txt; do chr=$(echo $i | cut -d "_" -f4 | sed 's/\.txt//'); while read line; do grep "$line" $i >> ${analyses_output_path}ZWscaffold_match_${chr}.txt;	done < ${analyses_output_path}kea_ZWscaffold_names.txt; done
 
 
 ### Add the alignment length to each file to assess matches are real alignments of potential matches against repetitive elements etc (short, several matches of the same length at different chromosome positions)
@@ -203,8 +203,6 @@ do
 	awk '{print $0 "\t" $6-$5+1}' $i > ${analyses_output_path}${name}_alignmentLengths.txt
 	
 done 
-
-
 
 ### Finally, manually check the matches of scaffolds against the other chromosomes and compare with matches to the actual Z and W to assess true Z W identity.
 ### Make a list of the final scaffold names. 
