@@ -37,7 +37,7 @@ Excluded the sex chromosome scaffolds in the bed file using VCFtools
 ```
 #!/bin/sh
 module load VCFtools/0.1.15-GCC-9.2.0-Perl-5.30.1
-vcftools --vcf filtered_dp3_34_md80.vcf --exclude-bed sex_chr.bed --recode --out sex_chr_rm
+vcftools --vcf filtered_dp3_34_md80.vcf --exclude-bed sex_chr.bed --recode
 ```
 Output below. Left with 22310 possible sites.
 ```
