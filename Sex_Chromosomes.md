@@ -23,4 +23,36 @@ Now will exclude all SNPs found for these scaffolds from vcf file.
 
 ## Removing kea sex chromosomes.
 
-vcftools --not-chr ??
+Created a bed file for the scaffolds that are on the sex chromosomes.
+
+```
+#!/bin/sh
+awk 'BEGIN {FS="\t"}; {print $1 FS "0" FS $2}' ../../kea_ref_genome.fasta.fai > kea_genome.bed
+sort kea_genome.bed >> kea_genome.bed
+join kea_ZWscaffold_names.txt kea_genome.bed > sex_chr.bed
+```
+
+Excluded the sex chromosome scaffolds in the bed file using VCFtools
+
+```
+#!/bin/sh
+module load VCFtools/0.1.15-GCC-9.2.0-Perl-5.30.1
+vcftools --vcf filtered_dp3_34_md80.vcf --exclude-bed sex_chr.bed --recode --out sex_chr_rm
+```
+Output below. Left with 22310 possible sites.
+```
+VCFtools - 0.1.15
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+        --vcf filtered_dp3_34_md80.vcf
+        --out sex_chr_rm
+        --recode
+        --exclude-bed sex_chr.bed
+
+After filtering, kept 187 out of 187 Individuals
+Outputting VCF file...
+        Read 2452 BED file entries.
+After filtering, kept 22310 out of a possible 22944 Sites
+Run Time = 8.00 seconds
+```
