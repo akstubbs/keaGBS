@@ -10,8 +10,5 @@ Aimee K. Stubbs - Master of Science Thesis
 
 ### Physical location of the data
 
-The raw data is on the Otago high capacity storage:
-
-smb://storage.hcs-p01.otago.ac.n/...
-
-contact akstubbs.nz@gmail.com for access.
+The raw data is on the Otago high capacity storage. 
+Contact akstubbs.nz@gmail.com for access.
